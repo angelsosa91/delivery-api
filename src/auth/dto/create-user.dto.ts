@@ -5,11 +5,13 @@ import {
     IsNotEmpty, 
     Matches,
     IsOptional,
+    IsEnum,
     IsBoolean
   } from 'class-validator';
   import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+  import { UserRole, UserStatus } from '../entities/user.entity';
   
-  export class RegisterDto {
+  export class CreateUserDto {
     @ApiProperty({ 
       description: 'Nombre completo del usuario',
       example: 'Juan Pérez'
@@ -38,10 +40,28 @@ import {
     password: string;
   
     @ApiPropertyOptional({ 
-      description: 'Aceptación de términos y condiciones',
+      description: 'Rol del usuario',
+      enum: UserRole,
+      default: UserRole.USER
+    })
+    @IsEnum(UserRole, { message: 'El rol debe ser válido' })
+    @IsOptional()
+    role?: UserRole;
+  
+    @ApiPropertyOptional({ 
+      description: 'Estado del usuario',
+      enum: UserStatus,
+      default: UserStatus.ACTIVE
+    })
+    @IsEnum(UserStatus, { message: 'El estado debe ser válido' })
+    @IsOptional()
+    status?: UserStatus;
+  
+    @ApiPropertyOptional({ 
+      description: 'Si el email ha sido verificado',
       default: false
     })
     @IsBoolean()
     @IsOptional()
-    acceptTerms?: boolean;
+    isEmailVerified?: boolean;
   }
