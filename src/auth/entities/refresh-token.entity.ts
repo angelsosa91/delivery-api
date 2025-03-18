@@ -22,13 +22,13 @@ import {
     token: string;
   
     @ApiProperty({ description: 'ID del usuario asociado' })
-    @Column()
+    @Column({ name: 'user_id'})
     @Index()
     userId: string;
   
     @ApiProperty({ description: 'Usuario asociado' })
     @ManyToOne(() => User, user => user.refreshTokens, { onDelete: 'CASCADE' })
-    @JoinColumn({ name: 'userId' })
+    @JoinColumn({ name: 'id' })
     user: User;
   
     @ApiProperty({ description: 'Familia del token (para renovación segura)' })
@@ -37,34 +37,34 @@ import {
     family: string;
   
     @ApiProperty({ description: 'Si el token ha sido utilizado' })
-    @Column({ default: false })
+    @Column({ name: 'is_used', default: false })
     isUsed: boolean;
   
     @ApiProperty({ description: 'Si el token ha sido revocado' })
-    @Column({ default: false })
+    @Column({ name: 'is_revoked', default: false })
     isRevoked: boolean;
   
     @ApiProperty({ description: 'Información del dispositivo (JSON)' })
-    @Column({ type: 'json', nullable: true })
+    @Column({ name: 'device_info', type: 'json', nullable: true })
     deviceInfo: Record<string, any>;
   
     @ApiProperty({ description: 'Dirección IP desde donde se creó el token' })
-    @Column({ nullable: true })
+    @Column({ name: 'ip_address', nullable: true })
     ipAddress: string;
   
     @ApiProperty({ description: 'Versión del token (para validar cambios de contraseña)' })
-    @Column()
+    @Column({ name: 'token_version' })
     tokenVersion: number;
   
     @ApiProperty({ description: 'Fecha de expiración del token' })
-    @Column()
+    @Column({ name: 'expires_at' })
     expiresAt: Date;
   
     @ApiProperty({ description: 'Fecha de creación del token' })
-    @CreateDateColumn()
+    @CreateDateColumn({ name: 'created_at' })
     createdAt: Date;
   
     @ApiProperty({ description: 'Fecha de última actualización del token' })
-    @UpdateDateColumn()
+    @UpdateDateColumn({ name: 'updated_at' })
     updatedAt: Date;
   }

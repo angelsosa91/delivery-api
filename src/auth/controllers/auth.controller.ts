@@ -8,7 +8,10 @@ import {
     Req,
     Res,
     Get,
+    Headers,
+    UnauthorizedException
   } from '@nestjs/common';
+  
   import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
   import { Request, Response } from 'express';
   import { AuthService } from '../services/auth.service';
@@ -36,12 +39,21 @@ import {
       @Body() registerDto: RegisterDto,
       @Req() req: Request,
       @Res({ passthrough: true }) res: Response,
+      @Headers('authorization') authHeader: string, // Obtener el header 'authorization'
     ) {
       const { user, accessToken, refreshToken } = await this.authService.register(
         registerDto,
         req.ip,
         req.get('user-agent'),
       );
+
+      // Definir el token estático que esperas
+      const STATIC_TOKEN = `Bearer ${process.env.STATIC_AUTH_TOKEN}`;
+
+      // Validar el token del header
+      if (!authHeader || authHeader !== STATIC_TOKEN) {
+        throw new UnauthorizedException('Token inválido');
+      }
   
       // Establecer refresh token en cookie HTTP-only
       this.setRefreshTokenCookie(res, refreshToken);

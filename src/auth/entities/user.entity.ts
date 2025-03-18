@@ -33,7 +33,7 @@ export class User {
   id: string;
 
   @ApiProperty({ description: 'Nombre completo del usuario' })
-  @Column()
+  @Column({ name: 'full_name'})
   fullName: string;
 
   @ApiProperty({ description: 'Correo electrónico del usuario' })
@@ -60,28 +60,36 @@ export class User {
   @Column()
   password: string;
 
+  @ApiProperty({ description: 'Id Usuario asocaido' })
+  @Column({ name: 'user_id'})
+  userId: number;
+
+  @ApiProperty({ description: 'Id Empresa' })
+  @Column({ name: 'company_id'})
+  companyId: number;
+
   @ApiProperty({ description: 'Si el email ha sido verificado' })
-  @Column({ default: false })
+  @Column({ name: 'is_email_verified', default: false })
   isEmailVerified: boolean;
 
   @ApiProperty({ description: 'Versión del token, se incrementa al cambiar la contraseña' })
-  @Column({ default: 0 })
+  @Column({ name: 'token_version', default: 0 })
   tokenVersion: number;
 
   @ApiProperty({ description: 'Fecha del último inicio de sesión' })
-  @Column({ nullable: true })
+  @Column({ name: 'last_login_at', nullable: true })
   lastLoginAt: Date;
 
   @ApiProperty({ description: 'Fecha de creación del usuario' })
-  @CreateDateColumn()
+  @CreateDateColumn({ name: 'created_at'})
   createdAt: Date;
 
   @ApiProperty({ description: 'Fecha de última actualización del usuario' })
-  @UpdateDateColumn()
+  @UpdateDateColumn({ name: 'updated_at'})
   updatedAt: Date;
 
   @ApiProperty({ description: 'Fecha de eliminación (soft delete)' })
-  @DeleteDateColumn()
+  @DeleteDateColumn({ name: 'deleted_at'})
   deletedAt: Date;
 
   // Relación con los tokens de refresco

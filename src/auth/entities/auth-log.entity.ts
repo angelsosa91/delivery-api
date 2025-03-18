@@ -34,6 +34,7 @@ import {
   
     @ApiProperty({ description: 'Tipo de evento' })
     @Column({
+      name: 'event_type',
       type: 'enum',
       enum: AuthEventType,
     })
@@ -41,21 +42,21 @@ import {
     eventType: AuthEventType;
   
     @ApiProperty({ description: 'ID del usuario asociado' })
-    @Column({ nullable: true })
+    @Column({ name: 'user_id', nullable: true })
     @Index()
     userId: string;
   
     @ApiProperty({ description: 'Usuario asociado' })
     @ManyToOne(() => User, { onDelete: 'SET NULL' })
-    @JoinColumn({ name: 'userId' })
+    @JoinColumn({ name: 'id' })
     user: User;
   
     @ApiProperty({ description: 'Dirección IP desde donde se originó el evento' })
-    @Column({ nullable: true })
+    @Column({ name: 'ip_address', nullable: true })
     ipAddress: string;
   
     @ApiProperty({ description: 'User agent del navegador/dispositivo' })
-    @Column({ type: 'text', nullable: true })
+    @Column({ name: 'user_agent', type: 'text', nullable: true })
     userAgent: string;
   
     @ApiProperty({ description: 'Si el evento fue exitoso' })
@@ -67,7 +68,7 @@ import {
     metadata: Record<string, any>;
   
     @ApiProperty({ description: 'Fecha de creación del registro' })
-    @CreateDateColumn()
+    @CreateDateColumn({ name: 'created_at' })
     @Index()
     createdAt: Date;
   }
