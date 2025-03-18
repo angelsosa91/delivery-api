@@ -9,12 +9,15 @@ import {
     UseGuards, 
     Query 
   } from '@nestjs/common';
+  import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
   import { CustomerService } from '../services/customer.service';
   import { CustomerDto } from '../dto/customer.dto';
   import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
   
+  @ApiTags('Clientes')
   @Controller('customers')
   @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   export class CustomerController {
     constructor(private readonly customerService: CustomerService) {}
   

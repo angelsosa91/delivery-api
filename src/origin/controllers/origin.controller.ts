@@ -9,12 +9,15 @@ import {
     UseGuards, 
     Query 
   } from '@nestjs/common';
+  import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
   import { OriginService } from '../services/origin.service';
   import { OriginDto } from '../dto/origin.dto';
   import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
   
+  @ApiTags('Puntos de Origen')
   @Controller('origin')
   @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   export class OriginController {
     constructor(private readonly originService: OriginService) {}
   

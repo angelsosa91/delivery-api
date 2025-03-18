@@ -9,13 +9,16 @@ import {
     UseGuards,
     Query
   } from '@nestjs/common';
+  import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
   import { OrderService } from '../services/order.service';
   import { OrderDto } from '../dto/order.dto';
   import { OrderReferenceDto } from '../dto/order-reference.dto';
   import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
   
+  @ApiTags('Pedidos')
   @Controller('orders')
   @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   export class OrderController {
     constructor(private readonly orderService: OrderService) {}
   
