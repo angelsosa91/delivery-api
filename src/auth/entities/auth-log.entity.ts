@@ -47,7 +47,7 @@ import {
     userId: string;
   
     @ApiProperty({ description: 'Usuario asociado' })
-    @ManyToOne(() => User, { onDelete: 'SET NULL' })
+    @ManyToOne(() => User, { onDelete: 'CASCADE' })
     @JoinColumn({ name: 'id' })
     user: User;
   
