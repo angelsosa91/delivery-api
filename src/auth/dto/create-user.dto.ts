@@ -6,7 +6,8 @@ import {
     Matches,
     IsOptional,
     IsEnum,
-    IsBoolean
+    IsBoolean,
+    IsNumber
   } from 'class-validator';
   import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
   import { UserRole, UserStatus } from '../entities/user.entity';
@@ -38,6 +39,14 @@ import {
       message: 'La contraseña debe incluir al menos una letra y un número' 
     })
     password: string;
+
+    @ApiProperty({ 
+      description: 'Usuario Id asociado',
+      example: '1'
+    })
+    @IsNumber()
+    @IsNotEmpty({ message: 'Usuario Id asociado es requerido' })
+    userId: number;
   
     @ApiPropertyOptional({ 
       description: 'Rol del usuario',

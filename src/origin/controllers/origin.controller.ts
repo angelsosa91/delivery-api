@@ -13,6 +13,7 @@ import {
   import { OriginService } from '../services/origin.service';
   import { OriginDto } from '../dto/origin.dto';
   import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
+  import { GetUser } from '../../auth/decorators/get-user.decorator';
   
   @ApiTags('Puntos de Origen')
   @Controller('origin')
@@ -23,7 +24,8 @@ import {
   
     // Endpoints para MpCliente
     @Post()
-    createCustomer(@Body() originDto: OriginDto) {
+    createCustomer(@GetUser('userId') userId: string, @Body() originDto: OriginDto) {
+      console.log(userId);
       return this.originService.createOrigin(originDto);
     }
   

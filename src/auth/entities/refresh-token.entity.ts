@@ -28,7 +28,7 @@ import {
   
     @ApiProperty({ description: 'Usuario asociado' })
     @ManyToOne(() => User, user => user.refreshTokens, { onDelete: 'CASCADE' })
-    @JoinColumn({ name: 'id' })
+    @JoinColumn({ name: 'user_id' })
     user: User;
   
     @ApiProperty({ description: 'Familia del token (para renovación segura)' })

@@ -42,13 +42,13 @@ import {
     eventType: AuthEventType;
   
     @ApiProperty({ description: 'ID del usuario asociado' })
-    @Column({ name: 'user_id', nullable: true })
+    @Column({ type: 'uuid', name: 'user_id', nullable: true })
     @Index()
     userId: string;
   
     @ApiProperty({ description: 'Usuario asociado' })
     @ManyToOne(() => User, { onDelete: 'CASCADE' })
-    @JoinColumn({ name: 'id' })
+    @JoinColumn({ name: 'user_id' })
     user: User;
   
     @ApiProperty({ description: 'Dirección IP desde donde se originó el evento' })

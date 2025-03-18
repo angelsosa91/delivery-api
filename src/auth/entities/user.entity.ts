@@ -65,7 +65,7 @@ export class User {
   userId: number;
 
   @ApiProperty({ description: 'Id Empresa' })
-  @Column({ name: 'company_id'})
+  @Column({ name: 'company_id', default: 0})
   companyId: number;
 
   @ApiProperty({ description: 'Si el email ha sido verificado' })

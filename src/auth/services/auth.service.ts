@@ -29,6 +29,7 @@ export class AuthService {
         fullName: registerDto.fullName,
         email: registerDto.email,
         password: registerDto.password,
+        userId: registerDto.userId
       });
 
       // Registrar evento

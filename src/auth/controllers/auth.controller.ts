@@ -39,21 +39,23 @@ import {
       @Body() registerDto: RegisterDto,
       @Req() req: Request,
       @Res({ passthrough: true }) res: Response,
-      @Headers('authorization') authHeader: string, // Obtener el header 'authorization'
+      @Headers('Authorization') authHeader: string, // Obtener el header 'authorization'
     ) {
-      const { user, accessToken, refreshToken } = await this.authService.register(
-        registerDto,
-        req.ip,
-        req.get('user-agent'),
-      );
-
       // Definir el token estático que esperas
       const STATIC_TOKEN = `Bearer ${process.env.STATIC_AUTH_TOKEN}`;
+      console.log(authHeader);
+      console.log(STATIC_TOKEN);
 
       // Validar el token del header
       if (!authHeader || authHeader !== STATIC_TOKEN) {
         throw new UnauthorizedException('Token inválido');
       }
+
+      const { user, accessToken, refreshToken } = await this.authService.register(
+        registerDto,
+        req.ip,
+        req.get('user-agent'),
+      );
   
       // Establecer refresh token en cookie HTTP-only
       this.setRefreshTokenCookie(res, refreshToken);
