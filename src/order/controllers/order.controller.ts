@@ -21,12 +21,12 @@ import {
   
     // Endpoints para Pedidos
     @Post()
-    createPedido(@Body() orderDto: OrderDto) {
+    createOrder(@Body() orderDto: OrderDto) {
       return this.orderService.createOrder(orderDto);
     }
   
     @Get()
-    findAllPedidos(@Query('userId') userId?: number) {
+    findAllOrders(@Query('userId') userId?: number) {
       if (userId) {
         return this.orderService.findOrdersByUser(userId);
       }
@@ -34,28 +34,28 @@ import {
     }
   
     @Get(':id')
-    findOnePedido(@Param('id') id: string) {
+    findOneOrder(@Param('id') id: string) {
       return this.orderService.findOneOrder(id);
     }
   
     @Patch(':id')
-    updatePedido(@Param('id') id: string, @Body() orderDto: OrderDto) {
+    updateOrder(@Param('id') id: string, @Body() orderDto: OrderDto) {
       return this.orderService.updateOrder(id, orderDto);
     }
   
     @Delete(':id')
-    removePedido(@Param('id') id: string) {
+    removeOrder(@Param('id') id: string) {
       return this.orderService.removeOrder(id);
     }
   
-    // Endpoints para PedidosReferencia
+    // Endpoints para Referencias
     @Post('references')
-    createPedidoReferencia(@Body() orderReferenceDto: OrderReferenceDto) {
+    createOrderReference(@Body() orderReferenceDto: OrderReferenceDto) {
       return this.orderService.createOrderReference(orderReferenceDto);
     }
   
     @Get('references/:orderId')
-    findPedidosReferenciasByPedido(@Param('orderId') orderId: string) {
+    findOrderReferencesByOrder(@Param('orderId') orderId: string) {
       return this.orderService.findOrderReferenceByOrder(orderId);
     }
   }

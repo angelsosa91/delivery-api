@@ -1,9 +1,11 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { AuthModule } from './auth/auth.module';
 import configuration from './config/configuration';
+import { AuthModule } from './auth/auth.module';
 import { OrderModule } from './order/order.module';
+import { CustomerModule } from './customer/customer.module';
+import { OriginModule } from './origin/origin.module';
 
 @Module({
   imports: [
@@ -37,7 +39,9 @@ import { OrderModule } from './order/order.module';
     
     // Módulos de la aplicación
     AuthModule,
-    OrderModule
+    OrderModule,
+    CustomerModule,
+    OriginModule
   ],
 })
 export class AppModule {}
