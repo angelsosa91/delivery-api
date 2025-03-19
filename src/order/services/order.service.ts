@@ -5,6 +5,8 @@ import { Order } from '../entities/order.entity';
 import { OrderReference } from '../entities/order-reference.entity';
 import { OrderDto } from '../dto/order.dto';
 import { OrderReferenceDto } from '../dto/order-reference.dto';
+import { UsersService } from '../../auth/services/users.service';
+import { GoogleMapsService } from '../../utils/services/google-maps.service';
 
 @Injectable()
 export class OrderService {
@@ -14,11 +16,15 @@ export class OrderService {
 
     @InjectRepository(OrderReference)
     private orderReferenceRepository: Repository<OrderReference>,
+
+    private readonly userService: UsersService,
+    private readonly googleMapsService: GoogleMapsService
   ) {}
 
   // Métodos para Pedidos
-  async createOrder(orderDto: OrderDto): Promise<Order> {
-    const order = this.mapToOrder(orderDto);
+  async createOrder(orderDto: OrderDto, authId: string): Promise<Order> {
+    const userId = await this.getUserId(authId);
+    const order = this.mapToEntity(orderDto, userId);
     return this.orderRepository.save(order);
   }
 
@@ -28,7 +34,8 @@ export class OrderService {
     });
   }
 
-  async findOrdersByUser(userId: number): Promise<Order[]> {
+  async findOrdersByUser(authId: string): Promise<Order[]> {
+    const userId = await this.getUserId(authId);
     return this.orderRepository.find({
       where: { userId: userId },
       relations: ['orderReferences'],
@@ -48,9 +55,10 @@ export class OrderService {
     return pedido;
   }
 
-  async updateOrder(id: string, orderDto: OrderDto): Promise<Order> {
+  async updateOrder(id: string, orderDto: OrderDto, authId: string): Promise<Order> {
+    const userId = await this.getUserId(authId);
     const order = await this.findOneOrder(id);
-    this.orderRepository.merge(order, this.mapToOrder(orderDto));
+    this.orderRepository.merge(order, this.mapToEntity(orderDto, userId));
     return this.orderRepository.save(order);
   }
 
@@ -75,7 +83,7 @@ export class OrderService {
     });
   }
 
-  mapToOrder(orderDto: OrderDto): Order {
+  mapToEntity(orderDto: OrderDto, userId: number): Order {
     const order = new Order();
 
     // Mapear los valores del DTO a la entidad
@@ -110,6 +118,7 @@ export class OrderService {
     order.orderType = 'S'; // Tipo de orden por defecto
     order.senderVip = 0; // Sender VIP por defecto
     order.senderCompany = 0; // Sender Company por defecto
+    order.userId = userId;
 
     return order;
   }
@@ -128,5 +137,28 @@ export class OrderService {
     orderReference.status = 'PENDIENTE'; // Por ejemplo, el estado por defecto
 
     return orderReference;
+  }
+
+  async getUserId(userId: string): Promise<number> {
+    try {
+      const user = await this.userService.findOne(userId);
+  
+      if (!user) {
+        throw new Error('Usuario no encontrado');
+      }
+  
+      return user.userId;
+    } catch (error) {
+      console.error('Error al obtener el usuario:', error);
+      throw error; // Re-lanzamos el error para que lo maneje el llamador
+    }
+  }
+
+  async calcularDistancia(origins: string, destinations: string) {
+    const distanceMatrix = await this.googleMapsService.getDistanceMatrix(
+      origins,
+      destinations,
+    );
+    return distanceMatrix;
   }
 }

@@ -14,7 +14,6 @@ import {
   import { OriginDto } from '../dto/origin.dto';
   import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
   import { GetUser } from '../../auth/decorators/get-user.decorator';
-import { UsersService } from 'src/auth/services/users.service';
   
   @ApiTags('Puntos de Origen')
   @Controller('origin')

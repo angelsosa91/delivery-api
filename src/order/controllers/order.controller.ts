@@ -14,6 +14,7 @@ import {
   import { OrderDto } from '../dto/order.dto';
   import { OrderReferenceDto } from '../dto/order-reference.dto';
   import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
+  import { GetUser } from '../../auth/decorators/get-user.decorator';
   
   @ApiTags('Pedidos')
   @Controller('orders')
@@ -24,14 +25,18 @@ import {
   
     // Endpoints para Pedidos
     @Post()
-    createOrder(@Body() orderDto: OrderDto) {
-      return this.orderService.createOrder(orderDto);
+    createOrder(
+      @GetUser('id') authId: string, 
+      @Body() orderDto: OrderDto
+    ) {
+      return this.orderService.createOrder(orderDto, authId);
     }
   
     @Get()
-    findAllOrders(@Query('userId') userId?: number) {
-      if (userId) {
-        return this.orderService.findOrdersByUser(userId);
+    //findAllOrders(@Query('userId') userId?: number) {
+    findAllOrders(@GetUser('id') authId: string) { 
+      if (authId) {
+        return this.orderService.findOrdersByUser(authId);
       }
       return this.orderService.findAllOrders();
     }
@@ -42,8 +47,12 @@ import {
     }
   
     @Patch(':id')
-    updateOrder(@Param('id') id: string, @Body() orderDto: OrderDto) {
-      return this.orderService.updateOrder(id, orderDto);
+    updateOrder(
+      @Param('id') id: string, 
+      @Body() orderDto: OrderDto,
+      @GetUser('id') authId: string, 
+    ) {
+      return this.orderService.updateOrder(id, orderDto, authId);
     }
   
     @Delete(':id')
