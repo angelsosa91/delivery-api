@@ -43,8 +43,6 @@ import {
     ) {
       // Definir el token estático que esperas
       const STATIC_TOKEN = `Bearer ${process.env.STATIC_AUTH_TOKEN}`;
-      console.log(authHeader);
-      console.log(STATIC_TOKEN);
 
       // Validar el token del header
       if (!authHeader || authHeader !== STATIC_TOKEN) {

@@ -3,17 +3,20 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Origin } from '../entities/origin.entity';
 import { OriginDto } from '../dto/origin.dto';
+import { UsersService } from 'src/auth/services/users.service';
 
 @Injectable()
 export class OriginService {
   constructor(
     @InjectRepository(Origin)
     private originRepository: Repository<Origin>,
+    private readonly userService: UsersService
   ) {}
 
   // Métodos para Cliente
-  async createOrigin(originDto: OriginDto): Promise<Origin> {
-    const origin = this.mapToOrigin(originDto);
+  async createOrigin(originDto: OriginDto, authId: string): Promise<Origin> {
+    const userId = await this.getUserId(authId);
+    const origin = this.mapToEntity(originDto, userId);
     return this.originRepository.save(origin);
   }
 
@@ -21,7 +24,8 @@ export class OriginService {
     return this.originRepository.find();
   }
 
-  async findOriginsByUser(userId: number): Promise<Origin[]> {
+  async findOriginsByUser(authId: string): Promise<Origin[]> {
+    const userId = await this.getUserId(authId);
     return this.originRepository.find({
       where: { userId: userId },
     });
@@ -39,9 +43,10 @@ export class OriginService {
     return origin;
   }
 
-  async updateOrigin(id: string, originDto: OriginDto): Promise<Origin> {
+  async updateOrigin(id: string, originDto: OriginDto, authId: string): Promise<Origin> {
+    const userId = await this.getUserId(authId);
     const origin = await this.findOneOrigin(id);
-    this.originRepository.merge(origin, this.mapToOrigin(originDto));
+    this.originRepository.merge(origin, this.mapToEntity(originDto, userId));
     return this.originRepository.save(origin);
   }
 
@@ -50,7 +55,7 @@ export class OriginService {
     await this.originRepository.remove(origin);
   }
 
-  mapToOrigin(originDto: OriginDto): Origin {
+  mapToEntity(originDto: OriginDto, userId: number): Origin {
       const origin = new Origin();
   
       // Mapear los valores del DTO a la entidad
@@ -64,9 +69,24 @@ export class OriginService {
       origin.default = (originDto.default == 'SI' ? 1 : 0);
   
       // Aquí puedes rellenar los demás campos que no vienen del DTO
-      origin.userId = 1; //modificar
+      origin.userId = userId; //modificar
       origin.status = 1;
   
       return origin;
+  }
+
+  async getUserId(userId: string): Promise<number> {
+    try {
+      const user = await this.userService.findOne(userId);
+  
+      if (!user) {
+        throw new Error('Usuario no encontrado');
+      }
+  
+      return user.userId;
+    } catch (error) {
+      console.error('Error al obtener el usuario:', error);
+      throw error; // Re-lanzamos el error para que lo maneje el llamador
     }
+  }
 }

@@ -13,6 +13,7 @@ import {
   import { CustomerService } from '../services/customer.service';
   import { CustomerDto } from '../dto/customer.dto';
   import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
+import { GetUser } from 'src/auth/decorators/get-user.decorator';
   
   @ApiTags('Clientes')
   @Controller('customers')
@@ -23,14 +24,18 @@ import {
   
     // Endpoints para MpCliente
     @Post()
-    createCustomer(@Body() customerDto: CustomerDto) {
-      return this.customerService.createCustomer(customerDto);
+    createCustomer(
+      @GetUser('id') authId: string,
+      @Body() customerDto: CustomerDto
+    ) {
+      return this.customerService.createCustomer(customerDto, authId);
     }
   
     @Get()
-    findCustomers(@Query('userId') userId?: number) {
-      if (userId) {
-        return this.customerService.findCustomersByUser(userId);
+    //findCustomers(@Query('userId') userId?: number) {
+    findCustomers(@GetUser('id') authId: string){
+      if (authId) {
+        return this.customerService.findCustomersByUser(authId);
       }
       return this.customerService.findAllCustomers();
     }
@@ -41,8 +46,12 @@ import {
     }
   
     @Patch(':id')
-    updateCustomer(@Param('id') id: string, @Body() customerDto: CustomerDto) {
-      return this.customerService.updateCustomer(id, customerDto);
+    updateCustomer(
+      @Param('id') id: string, 
+      @Body() customerDto: CustomerDto,
+      @GetUser('id') authId: string,
+    ) {
+      return this.customerService.updateCustomer(id, customerDto, authId);
     }
   
     @Delete(':id')

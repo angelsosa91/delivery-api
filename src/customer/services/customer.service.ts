@@ -3,17 +3,20 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Customer } from '../entities/customer.entity';
 import { CustomerDto } from '../dto/customer.dto';
+import { UsersService } from 'src/auth/services/users.service';
 
 @Injectable()
 export class CustomerService {
   constructor(
     @InjectRepository(Customer)
     private customerRepository: Repository<Customer>,
+    private readonly userService: UsersService
   ) {}
 
   // Métodos para Cliente
-  async createCustomer(customerDto: CustomerDto): Promise<Customer> {
-    const customer = this.mapToCustomer(customerDto);
+  async createCustomer(customerDto: CustomerDto, authId: string): Promise<Customer> {
+    const userId = await this.getUserId(authId);
+    const customer = this.mapToEntity(customerDto, userId);
     return this.customerRepository.save(customer);
   }
 
@@ -21,7 +24,8 @@ export class CustomerService {
     return this.customerRepository.find();
   }
 
-  async findCustomersByUser(userId: number): Promise<Customer[]> {
+  async findCustomersByUser(authId: string): Promise<Customer[]> {
+    const userId = await this.getUserId(authId);
     return this.customerRepository.find({
       where: { userId: userId },
     });
@@ -39,9 +43,10 @@ export class CustomerService {
     return customer;
   }
 
-  async updateCustomer(id: string, customerDto: CustomerDto): Promise<Customer> {
+  async updateCustomer(id: string, customerDto: CustomerDto, authId: string): Promise<Customer> {
+    const userId = await this.getUserId(authId);
     const customer = await this.findOneCustomer(id);
-    this.customerRepository.merge(customer, this.mapToCustomer(customerDto));
+    this.customerRepository.merge(customer, this.mapToEntity(customerDto, userId));
     return this.customerRepository.save(customer);
   }
 
@@ -50,7 +55,7 @@ export class CustomerService {
     await this.customerRepository.remove(customer);
   }
 
-  mapToCustomer(customerDto: CustomerDto): Customer {
+  mapToEntity(customerDto: CustomerDto, userId: number): Customer {
       const customer = new Customer();
   
       // Mapear los valores del DTO a la entidad
@@ -63,9 +68,24 @@ export class CustomerService {
       customer.references = customerDto.references;
   
       // Aquí puedes rellenar los demás campos que no vienen del DTO
-      customer.userId = 1; //modificar
+      customer.userId = userId;
       customer.status = 1;
   
       return customer;
+  }
+
+  async getUserId(userId: string): Promise<number> {
+    try {
+      const user = await this.userService.findOne(userId);
+  
+      if (!user) {
+        throw new Error('Usuario no encontrado');
+      }
+  
+      return user.userId;
+    } catch (error) {
+      console.error('Error al obtener el usuario:', error);
+      throw error; // Re-lanzamos el error para que lo maneje el llamador
     }
+  }
 }

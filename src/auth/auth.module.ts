@@ -6,7 +6,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 
 // Controladores
 import { AuthController } from './controllers/auth.controller';
-import { UsersController } from './controllers/users.controller';
+//import { UsersController } from './controllers/users.controller';
 
 // Servicios
 import { AuthService } from './services/auth.service';
@@ -43,7 +43,7 @@ import { AuthLog } from './entities/auth-log.entity';
       }),
     }),
   ],
-  controllers: [AuthController, UsersController],
+  controllers: [AuthController], // [AuthController, UsersController],
   providers: [
     // Servicios
     UsersService,

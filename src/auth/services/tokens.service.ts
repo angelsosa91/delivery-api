@@ -56,7 +56,7 @@ export class TokensService {
 
     // Calcular fecha de expiración
     const expiresAt = new Date();
-    expiresAt.setDate(expiresAt.getDate() + 7); // Expira en 7 días
+    expiresAt.setDate(expiresAt.getDate() + 1); // Expira en 1 días
 
     // Hashear token para almacenamiento seguro
     const hashedToken = await this.hashToken(refreshToken);
