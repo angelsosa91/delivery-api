@@ -43,19 +43,19 @@ export class Order {
   @Column({ name: 'user_id' })
   userId: number;
 
-  @Column({ name: 'distance', length: 20 })
-  distance: string;
+  @Column()
+  distance: number;
 
-  @Column({ name: 'amount' })
+  @Column()
   amount: number;
 
-  @Column({ name: 'rating', default: 0 })
+  @Column({ default: 0 })
   rating: number;
 
   @Column({ name: 'delivery_time', length: 45, nullable: true })
   deliveryTime: string;
 
-  @Column({ name: 'comments', length: 4500, default: 'NINGUNO' })
+  @Column({ length: 4500, default: 'NINGUNO' })
   comments: string;
 
   @Column({ name: 'discount', default: 0 })

@@ -23,8 +23,14 @@ export class OrderService {
 
   // Métodos para Pedidos
   async createOrder(orderDto: OrderDto, authId: string): Promise<Order> {
+    const origin = orderDto.latitudeFrom+','+orderDto.longitudeFrom;
+    const destination = orderDto.latitudeTo+','+orderDto.longitudeTo;
+    const data = await this.calcularDistancia(origin, destination);
+    const distance = Math.round(Math.floor(data.rows[0].elements[0].distance.value / 1000));
+    //const duration = data.rows[0].elements[0].duration.value;
+    const amount = this.calcularMonto(distance, 'DELIVERY');
     const userId = await this.getUserId(authId);
-    const order = this.mapToEntity(orderDto, userId);
+    const order = this.mapToEntity(orderDto, userId, distance, amount);
     return this.orderRepository.save(order);
   }
 
@@ -56,9 +62,15 @@ export class OrderService {
   }
 
   async updateOrder(id: string, orderDto: OrderDto, authId: string): Promise<Order> {
+    const origin = orderDto.latitudeFrom+','+orderDto.longitudeFrom;
+    const destination = orderDto.latitudeTo+','+orderDto.longitudeTo;
+    const data = await this.calcularDistancia(origin, destination);
+    const distance = Math.round(Math.floor(data.rows[0].elements[0].distance.value / 1000));
+    //const duration = data.rows[0].elements[0].duration.value;
+    const amount = this.calcularMonto(distance, 'DELIVERY');
     const userId = await this.getUserId(authId);
     const order = await this.findOneOrder(id);
-    this.orderRepository.merge(order, this.mapToEntity(orderDto, userId));
+    this.orderRepository.merge(order, this.mapToEntity(orderDto, userId, distance, amount));
     return this.orderRepository.save(order);
   }
 
@@ -83,7 +95,7 @@ export class OrderService {
     });
   }
 
-  mapToEntity(orderDto: OrderDto, userId: number): Order {
+  mapToEntity(orderDto: OrderDto, userId: number, distance: number, amount: number): Order {
     const order = new Order();
 
     // Mapear los valores del DTO a la entidad
@@ -97,7 +109,7 @@ export class OrderService {
     order.latitudeTo = orderDto.latitudeTo;
     order.longitudeTo = orderDto.longitudeTo;
     order.comments = orderDto.comments;
-    order.withReturn = parseInt(orderDto.withReturn, 10); // Convertir a número si es necesario
+    order.withReturn = (orderDto.withReturn == 'SI' ? 1 : 0); // Convertir a número si es necesario
     order.scheduled = orderDto.scheduled;
     order.scheduledDate = new Date(orderDto.scheduledDate);
     order.invoice = orderDto.invoice;
@@ -110,8 +122,8 @@ export class OrderService {
     // Aquí puedes rellenar los demás campos que no vienen del DTO
     order.status = 'Pendiente'; // Por ejemplo, el estado por defecto
     order.registerDate = new Date(); // Fecha de registro actual
-    order.distance = '0'; // Distancia por defecto
-    order.amount = 0; // Monto por defecto
+    order.distance = distance; // Distancia por defecto
+    order.amount = amount; // Monto por defecto
     order.rating = 0; // Rating por defecto
     order.deliveryTime = '0'; // Tiempo de entrega por defecto
     order.discount = 0; // Descuento por defecto
@@ -160,5 +172,52 @@ export class OrderService {
       destinations,
     );
     return distanceMatrix;
+  }
+
+  calcularMonto(distancia: number, tipoServicio: string): number {
+    let monto: number;
+    // Convertir a kilómetros (si es necesario)
+    // Lógica de cálculo basada en la distancia
+    if (distancia <= 2) {
+      monto = 10000;
+    } else if (distancia > 2 && distancia < 7) {
+      monto = 15000;
+    } else if (distancia >= 7 && distancia < 11) {
+      monto = 20000;
+    } else if (distancia >= 11 && distancia < 14) {
+      monto = 25000;
+    } else if (distancia > 13) {
+      const dist1 = distancia - 13;
+      monto = dist1 * 2000 + 25000;
+    } else {
+      monto = 0; // Valor por defecto en caso de distancia no válida
+    }
+
+    // Lógica de cálculo basada en el tipo de servicio
+    switch (tipoServicio) {
+      case 'COBRANZAS':
+        monto += 5000;
+        break;
+      case 'GESTIONES BANCARIAS':
+        monto += 10000;
+        break;
+      case 'GESTIONES ADUANERAS':
+        monto += 30000;
+        break;
+      case 'GESTIONES PUBLICAS':
+        monto += 30000;
+        break;
+      case 'COMPRAS':
+        monto += 10000;
+        break;
+      case 'GESTION PERSONAL':
+        monto += 10000;
+        break;
+      default:
+        // No se agrega nada si el tipo de servicio no coincide
+        break;
+    }
+
+    return monto;
   }
 }
