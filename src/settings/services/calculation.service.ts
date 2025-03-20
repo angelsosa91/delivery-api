@@ -1,0 +1,73 @@
+import { Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { TariffDistance } from '../entities/tariff-distance.entity';
+import { TariffService } from '../entities/tariff-service.entity';
+import { Configuration } from '../entities/configuration.entity';
+import { GoogleMapsService } from '../../utils/services/google-maps.service';
+
+@Injectable()
+export class CalculationService {
+  constructor(
+    @InjectRepository(TariffDistance)
+    private readonly tariffDistanceRepository: Repository<TariffDistance>,
+    @InjectRepository(TariffService)
+    private readonly tariffServiceRepository: Repository<TariffService>,
+    @InjectRepository(Configuration)
+    private readonly configurationRepository: Repository<Configuration>,
+
+    private readonly googleMapsService: GoogleMapsService
+  ) {}
+
+  async calculateAmount(distance: number, service: string, wreturn: string): Promise<number> {
+    // Obtener tarifa por distancia
+    const tariffDistance = await this.tariffDistanceRepository.findOne({
+      where: {
+        distanceMin: distance >= 0 ? distance : 0,
+        distanceMax: distance <= 14 ? distance : Infinity,
+      },
+    });
+
+    let amount = tariffDistance ? tariffDistance.baseAmount : 0;
+
+    // Aplicar tarifa adicional por distancia si es mayor a 14 km
+    if (distance > 14) {
+      const tariffAdd = await this.configurationRepository.findOne({
+        where: { key: 'tariff_add_per_km' },
+      });
+
+      if (tariffAdd) {
+        amount += (distance - 14) * tariffAdd.value;
+      }
+    }
+
+    // Aplicar tarifa por servicio
+    const tariffService = await this.tariffServiceRepository.findOne({
+      where: { service: service },
+    });
+
+    if (tariffService) {
+      amount += tariffService.amountAdd;
+    }
+
+    // Aplicar multiplicador si tiene retorno
+    if (wreturn === 'SI') {
+      const multiplicator_return = await this.configurationRepository.findOne({
+        where: { key: 'multiplicator_return' },
+      });
+      if (multiplicator_return) {
+        amount *= multiplicator_return.value;
+      }
+    }
+
+    return amount;
+  }
+
+  async calculateDistance(origins: string, destinations: string) {
+    const distanceMatrix = await this.googleMapsService.getDistanceMatrix(
+      origins,
+      destinations,
+    );
+    return distanceMatrix;
+  }
+}

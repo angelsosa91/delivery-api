@@ -14,6 +14,7 @@ import { Exclude } from 'class-transformer';
 import * as bcrypt from 'bcrypt';
 import { RefreshToken } from './refresh-token.entity';
 import { ApiProperty } from '@nestjs/swagger';
+import { OrderBudget } from 'src/order/entities/order-budget.entity';
 
 export enum UserRole {
   ADMIN = 'admin',
@@ -95,6 +96,10 @@ export class User {
   // Relación con los tokens de refresco
   @OneToMany(() => RefreshToken, (token) => token.user)
   refreshTokens: RefreshToken[];
+
+  // Relación con Order
+  @OneToMany(() => OrderBudget, orderBudget => orderBudget.user) // Un cliente puede tener muchas órdenes
+  budgets: OrderBudget[]; // Propiedad para acceder a las órdenes desde el cliente
 
   // Encriptar contraseña antes de insertar o actualizar
   @BeforeInsert()

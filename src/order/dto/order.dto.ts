@@ -52,35 +52,35 @@ export class OrderDto {
   @IsString()
   senderPhone: string;
 
-  @ApiPropertyOptional({ 
+  @ApiProperty({ 
     description: 'Latitud',
     example: '-25.3298328'
   })
-  @IsOptional()
+  @IsNotEmpty()
   @IsString()
   latitudeFrom: string;
 
-  @ApiPropertyOptional({ 
+  @ApiProperty({ 
     description: 'Longitud',
     example: '-57.5690995'
   })
-  @IsOptional()
+  @IsNotEmpty()
   @IsString()
   longitudeFrom: string;
 
-  @ApiProperty({ 
+  @ApiPropertyOptional({ 
     description: 'Latitud',
     example: '-25.3585123'
   })
-  @IsNotEmpty()
+  @IsOptional()
   @IsString()
   latitudeTo: string;
 
-  @ApiProperty({ 
+  @ApiPropertyOptional({ 
     description: 'Longitud',
     example: '-57.510234'
   })
-  @IsNotEmpty()
+  @IsOptional()
   @IsString()
   longitudeTo: string;
 
@@ -97,7 +97,7 @@ export class OrderDto {
     example: 'SI/NO'
   })
   @IsNotEmpty()
-  @IsString()
+  @IsEnum(['SI', 'NO'])
   withReturn: string;
 
   @ApiProperty({ 

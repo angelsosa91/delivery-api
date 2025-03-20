@@ -192,4 +192,22 @@ export class UsersService {
     
     await this.usersRepository.save(user);
   }
+
+  /**
+   * Obtener userId desde Id del usuario
+   */
+  async getUserId(userId: string): Promise<number> {
+    try {
+      const user = await this.findOne(userId);
+  
+      if (!user) {
+        throw new Error('Usuario no encontrado');
+      }
+  
+      return user.userId;
+    } catch (error) {
+      console.error('Error al obtener el usuario:', error);
+      throw error; // Re-lanzamos el error para que lo maneje el llamador
+    }
+  }
 }

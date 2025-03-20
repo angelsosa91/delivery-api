@@ -15,6 +15,7 @@ import {
   import { OrderReferenceDto } from '../dto/order-reference.dto';
   import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
   import { GetUser } from '../../auth/decorators/get-user.decorator';
+import { OrderBudgetDto } from '../dto/order-budget.dto';
   
   @ApiTags('Pedidos')
   @Controller('orders')
@@ -58,5 +59,14 @@ import {
     @Delete(':id')
     removeOrder(@Param('id') id: string) {
       return this.orderService.removeOrder(id);
+    }
+
+    // Endpoints para consulta de presupuesto
+    @Post()
+    getBudget(
+      @GetUser('id') authId: string,
+      @Body() orderBudgetDto: OrderBudgetDto
+    ) {
+      return this.orderService.getBudget(orderBudgetDto, authId);
     }
   }

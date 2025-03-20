@@ -1,6 +1,7 @@
-import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, ManyToOne, JoinColumn } from 'typeorm';
+import { Order } from './order.entity';
 
-@Entity('order_points')
+@Entity('orders_points')
 export class OrderPoint {
     @PrimaryGeneratedColumn('uuid')
     id: string;
@@ -46,4 +47,9 @@ export class OrderPoint {
 
     @Column({ length: 200, default: 'DELIVERY' })
     service: string;
+
+    // Relación con Customer
+    @ManyToOne(() => Order, order => order.points) // Un cliente puede tener muchas órdenes
+    @JoinColumn({ name: 'order_id' }) // Columna en la tabla `orders` que referencia al cliente
+    order: Order; // Propiedad para acceder al cliente desde la orden
 }

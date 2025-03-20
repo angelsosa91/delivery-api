@@ -1,49 +1,66 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Injectable, NotFoundException, Scope } from '@nestjs/common';
+import { InjectRepository, InjectEntityManager  } from '@nestjs/typeorm';
+import { Repository, EntityManager } from 'typeorm';
 import { Order } from '../entities/order.entity';
 import { OrderReference } from '../entities/order-reference.entity';
 import { OrderDto } from '../dto/order.dto';
 import { OrderReferenceDto } from '../dto/order-reference.dto';
 import { UsersService } from '../../auth/services/users.service';
-import { GoogleMapsService } from '../../utils/services/google-maps.service';
 import { CustomerService } from 'src/customer/services/customer.service';
 import { OrderPoint } from '../entities/order-points.entity';
+import { OrderBudgetDto } from '../dto/order-budget.dto';
+import { OrderBudgetResponseDto } from '../dto/order-budget-response.dto';
+import { OrderBudget } from '../entities/order-budget.entity';
+import { Transactional } from '../../utils/decorators/transactional';
+import { CalculationService } from '../../settings/services/calculation.service';
 
-@Injectable()
+@Injectable({ scope: Scope.REQUEST })
 export class OrderService {
   //constantes
   private readonly SERVICE_TYPE: string = 'DELIVERY';
+  private readonly SERVICE_STATUS: string = 'Pendiente';
+  private readonly REFERENCE_STATUS: string = 'PENDIENTE';
+  private readonly BUDGET_STATUS: string = 'CONSULTADO';
 
   //constructor
   constructor(
+    @InjectEntityManager()
+    private readonly entityManager: EntityManager,
+
     @InjectRepository(Order)
     private orderRepository: Repository<Order>,
     @InjectRepository(OrderReference)
     private orderReferenceRepository: Repository<OrderReference>,
     @InjectRepository(OrderPoint)
     private orderPointRepository: Repository<OrderPoint>,
+    @InjectRepository(OrderBudget)
+    private orderBudgetRepository: Repository<OrderBudget>,
 
     private readonly userService: UsersService,
     private readonly customerService: CustomerService,
-    private readonly googleMapsService: GoogleMapsService
+    private readonly calculationService: CalculationService
   ) {}
 
   // Crear Orden
+  @Transactional()
   async createOrder(orderDto: OrderDto, authId: string): Promise<Order> {
     const { order } = await this.prepareOrderData(orderDto, authId);
-    const savedOrder = await this.orderRepository.save(order);
+    //const savedOrder = await this.orderRepository.save(order);
+    const savedOrder = await this.entityManager.save(Order, order);
     await this.saveOrderReferences(savedOrder, orderDto.references);
+    await this.saveOrderPoints(savedOrder);
     return savedOrder;
   }
 
   // Actualizar Orden
+  @Transactional()
   async updateOrder(id: string, orderDto: OrderDto, authId: string): Promise<Order> {
     const { order } = await this.prepareOrderData(orderDto, authId);
     const existingOrder = await this.findOneOrder(id);
     this.orderRepository.merge(existingOrder, order);
     const updatedOrder = await this.orderRepository.save(existingOrder);
     await this.saveOrderReferences(updatedOrder, orderDto.references);
+    await this.saveOrderPoints(updatedOrder);
     return updatedOrder;
   }
 
@@ -52,10 +69,10 @@ export class OrderService {
     await this.validateCustomerInputs(orderDto);
     const origin = orderDto.latitudeFrom + ',' + orderDto.longitudeFrom;
     const destination = orderDto.latitudeTo + ',' + orderDto.longitudeTo;
-    const data = await this.calcularDistancia(origin, destination);
+    const data = await this.calculationService.calculateDistance(origin, destination);
     const distance = Math.round(Math.floor(data.rows[0].elements[0].distance.value / 1000));
-    const amount = this.calcularMonto(distance, this.SERVICE_TYPE);
-    const userId = await this.getUserId(authId);
+    const amount = await this.calculationService.calculateAmount(distance, this.SERVICE_TYPE, orderDto.withReturn);
+    const userId = await this.userService.getUserId(authId);
     const order = this.mapToEntity(orderDto, userId, distance, amount);
     return { order, distance, amount };
   }
@@ -69,13 +86,27 @@ export class OrderService {
         orderReference.order = order;
         return orderReference;
       });
-      await this.orderReferenceRepository.save(orderReferences);
+      //await this.orderReferenceRepository.save(orderReferences);
+      await this.entityManager.save(OrderReference, orderReferences);
     }
   }
 
+  // Método auxiliar para guardar o actualizar puntos
+  private async saveOrderPoints(order: Order): Promise<void> {
+    await this.deletePointsByOrder(order.id);
+    const orderPoint = this.mapToOrderPoint(order);
+    orderPoint.order = order;
+    //await this.orderPointRepository.save(orderPoint);
+    await this.entityManager.save(OrderPoint, orderPoint);
+  }
+
+  @Transactional()
   async removeOrder(id: string): Promise<void> {
+    //const pedido = await this.entityManager.findOne(Order, id);
     const pedido = await this.findOneOrder(id);
-    await this.orderRepository.remove(pedido);
+    //await this.orderRepository.remove(pedido);
+    await this.entityManager.remove(Order, pedido);
+    //await this.entityManager.delete(Order, { orderId: id });
   }
 
   async deleteReferencesByOrder(orderId: string): Promise<void> {
@@ -83,10 +114,34 @@ export class OrderService {
     const references = await this.orderReferenceRepository.find({
         where: { orderId: orderId },
     });
+    /*
+    const references = await this.entityManager.find(OrderReference, {
+      where: { orderId },
+    });
+    */  
 
     // Si hay referencias, eliminarlas
     if (references.length > 0) {
-        await this.orderReferenceRepository.remove(references);
+        //await this.orderReferenceRepository.remove(references);
+        await this.entityManager.remove(OrderReference, references);
+    }
+  }
+
+  async deletePointsByOrder(orderId: string): Promise<void> {
+    // Buscar todas las referencias asociadas a la orden
+    const points = await this.orderPointRepository.find({
+        where: { orderId: orderId },
+    });
+    /*
+    const points = await this.entityManager.find(OrderPoint, {
+      where: { orderId },
+    });
+    */
+
+    // Si hay referencias, eliminarlas
+    if (points.length > 0) {
+        //await this.orderPointRepository.remove(points);
+        await this.entityManager.remove(OrderPoint, points);
     }
   }
 
@@ -97,7 +152,7 @@ export class OrderService {
   }
 
   async findOrdersByUser(authId: string): Promise<Order[]> {
-    const userId = await this.getUserId(authId);
+    const userId = await this.userService.getUserId(authId);
     return this.orderRepository.find({
       where: { userId: userId },
       relations: ['orderReferences'],
@@ -117,6 +172,20 @@ export class OrderService {
     return pedido;
   }
 
+  async getBudget(orderBudgetDto: OrderBudgetDto, authId: string): Promise<OrderBudgetResponseDto> {
+    const origin = orderBudgetDto.latitudeFrom + ',' + orderBudgetDto.longitudeFrom;
+    const destination = orderBudgetDto.latitudeTo + ',' + orderBudgetDto.longitudeTo;
+    const data = await this.calculationService.calculateDistance(origin, destination);
+    const distance = data.rows[0].elements[0].distance.text;
+    const amount = await this.calculationService.calculateAmount(distance, this.SERVICE_TYPE, orderBudgetDto.withReturn);
+    //map to
+    const budget = this.mapToOrderBudget(orderBudgetDto, authId, distance, amount);
+    //guardar transaccion de consulta
+    await this.orderBudgetRepository.save(budget);
+    //response
+    return new OrderBudgetResponseDto(distance, amount);
+  }
+
   async validateCustomerInputs(orderDto: OrderDto){
     // Validar si el customerId está presente
     if (orderDto.customerId) {
@@ -128,18 +197,18 @@ export class OrderService {
       //rellenar campos
       orderDto.receiverName = !orderDto.receiverName ? customer.fullName : orderDto.receiverName; 
       orderDto.receiverPhone = !orderDto.receiverPhone ? customer.phone : orderDto.receiverPhone;
-      orderDto.latitudeFrom = !orderDto.latitudeFrom ? customer.latitude : orderDto.latitudeFrom;
-      orderDto.longitudeFrom = !orderDto.longitudeFrom ? customer.longitude : orderDto.longitudeFrom;
+      orderDto.latitudeTo = !orderDto.latitudeTo ? customer.latitude : orderDto.latitudeTo;
+      orderDto.longitudeTo = !orderDto.longitudeTo ? customer.longitude : orderDto.longitudeTo;
     } else {
       // Si no hay customerId, validar que los campos requeridos estén presentes
       if (
         !orderDto.receiverName ||
         !orderDto.receiverPhone ||
-        !orderDto.latitudeFrom ||
-        !orderDto.longitudeFrom
+        !orderDto.latitudeTo ||
+        !orderDto.longitudeTo
       ) {
         throw new Error(
-          'Si no se proporciona un customerId, los campos receiverName, receiverPhone, latitudeFrom y longitudeFrom son obligatorios',
+          'Si no se proporciona un customerId, los campos receiverName, receiverPhone, latitudeTo y longitudeTo son obligatorios',
         );
       }
     }
@@ -170,7 +239,7 @@ export class OrderService {
     order.bank = orderDto.bank;
 
     // Aquí puedes rellenar los demás campos que no vienen del DTO
-    order.status = 'Pendiente'; // Por ejemplo, el estado por defecto
+    order.status = this.SERVICE_STATUS; // Por ejemplo, el estado por defecto
     order.registerDate = new Date(); // Fecha de registro actual
     order.distance = distance; // Distancia por defecto
     order.amount = amount; // Monto por defecto
@@ -194,78 +263,51 @@ export class OrderService {
     orderReference.observation = orderReferenceDto.observation;
 
     // Aquí puedes rellenar los demás campos que no vienen del DTO
-    orderReference.status = 'PENDIENTE'; // Por ejemplo, el estado por defecto
+    orderReference.status = this.REFERENCE_STATUS; // Por ejemplo, el estado por defecto
 
     return orderReference;
   }
 
-  async getUserId(userId: string): Promise<number> {
-    try {
-      const user = await this.userService.findOne(userId);
-  
-      if (!user) {
-        throw new Error('Usuario no encontrado');
-      }
-  
-      return user.userId;
-    } catch (error) {
-      console.error('Error al obtener el usuario:', error);
-      throw error; // Re-lanzamos el error para que lo maneje el llamador
-    }
+  mapToOrderPoint(order: Order): OrderPoint {
+    const orderPoint = new OrderPoint();
+
+    // Mapear los valores del DTO a la entidad
+    orderPoint.customerId = order.customerId;
+    orderPoint.orderId = order.id;
+    orderPoint.name = order.receiverName;
+    orderPoint.address = !order.customer ? order.description : order.customer.address;
+    orderPoint.phone = order.receiverPhone;
+    orderPoint.latitude = order.latitudeTo;
+    orderPoint.longitude = order.longitudeTo;
+    orderPoint.scheduledDate = order.scheduledDate;
+    orderPoint.comments = order.comments;
+    orderPoint.amount = order.amount;
+    orderPoint.distance = order.distance;
+    orderPoint.deliveryTime = order.deliveryTime;
+
+    // Aquí puedes rellenar los demás campos que no vienen del DTO
+    orderPoint.service = this.SERVICE_TYPE;
+    orderPoint.status = this.SERVICE_STATUS; // Por ejemplo, el estado por defecto
+
+    return orderPoint;
   }
 
-  async calcularDistancia(origins: string, destinations: string) {
-    const distanceMatrix = await this.googleMapsService.getDistanceMatrix(
-      origins,
-      destinations,
-    );
-    return distanceMatrix;
-  }
+  mapToOrderBudget(orderBudgetDto: OrderBudgetDto, authId, distance, amount): OrderBudget {
+    const orderBudget = new OrderBudget();
 
-  calcularMonto(distancia: number, tipoServicio: string): number {
-    let monto: number;
-    // Convertir a kilómetros (si es necesario)
-    // Lógica de cálculo basada en la distancia
-    if (distancia <= 2) {
-      monto = 10000;
-    } else if (distancia > 2 && distancia < 7) {
-      monto = 15000;
-    } else if (distancia >= 7 && distancia < 11) {
-      monto = 20000;
-    } else if (distancia >= 11 && distancia < 14) {
-      monto = 25000;
-    } else if (distancia > 13) {
-      const dist1 = distancia - 13;
-      monto = dist1 * 2000 + 25000;
-    } else {
-      monto = 0; // Valor por defecto en caso de distancia no válida
-    }
+    // Mapear los valores del DTO a la entidad
+    orderBudget.userId = authId;
+    orderBudget.latitudeFrom = orderBudgetDto.latitudeFrom;
+    orderBudget.longitudeFrom = orderBudgetDto.longitudeFrom;
+    orderBudget.latitudeTo = orderBudgetDto.latitudeTo;
+    orderBudget.longitudeTo = orderBudgetDto.longitudeTo;
+    orderBudget.distance = distance;
+    orderBudget.amount = amount;
+    orderBudget.withReturn = (orderBudgetDto.withReturn == 'SI' ? 1 : 0);
 
-    // Lógica de cálculo basada en el tipo de servicio
-    switch (tipoServicio) {
-      case 'COBRANZAS':
-        monto += 5000;
-        break;
-      case 'GESTIONES BANCARIAS':
-        monto += 10000;
-        break;
-      case 'GESTIONES ADUANERAS':
-        monto += 30000;
-        break;
-      case 'GESTIONES PUBLICAS':
-        monto += 30000;
-        break;
-      case 'COMPRAS':
-        monto += 10000;
-        break;
-      case 'GESTION PERSONAL':
-        monto += 10000;
-        break;
-      default:
-        // No se agrega nada si el tipo de servicio no coincide
-        break;
-    }
+    // Aquí puedes rellenar los demás campos que no vienen del DTO
+    orderBudget.status = this.BUDGET_STATUS;
 
-    return monto;
+    return orderBudget;
   }
 }

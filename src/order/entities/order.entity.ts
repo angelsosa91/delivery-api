@@ -1,6 +1,7 @@
 import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, ManyToOne, OneToMany, JoinColumn } from 'typeorm';
 import { OrderReference } from './order-reference.entity';
 import { Customer } from 'src/customer/entities/customer.entity';
+import { OrderPoint } from './order-points.entity';
 
 @Entity('orders')
 export class Order {
@@ -102,6 +103,10 @@ export class Order {
 
   @OneToMany(() => OrderReference, orderReference => orderReference.order)
   orderReferences: OrderReference[];
+
+  // Relación con Points
+  @OneToMany(() => OrderPoint, orderPoint => orderPoint.order) // Una orden puede tener muchos puntos
+  points: OrderPoint[]; // Propiedad para acceder a las puntos desde la Orden
 
   // Relación con Customer
   @ManyToOne(() => Customer, customer => customer.orders) // Un cliente puede tener muchas órdenes
