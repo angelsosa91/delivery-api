@@ -7,11 +7,12 @@ import { OrderReference } from './entities/order-reference.entity';
 import { OrderPoints } from './entities/order-points.entity';
 import { AuthModule } from 'src/auth/auth.module';
 import { UtilsModule } from 'src/utils/utils.module';
+import { CustomerModule } from 'src/customer/customer.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([Order, OrderReference, OrderPoints]), 
-    AuthModule, UtilsModule
+    AuthModule, CustomerModule, UtilsModule
   ],
   controllers: [OrderController],
   providers: [OrderService],

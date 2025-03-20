@@ -1,6 +1,6 @@
 import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, ManyToOne, OneToMany, JoinColumn } from 'typeorm';
-import { User } from '../../auth/entities/user.entity';
 import { OrderReference } from './order-reference.entity';
+import { Customer } from 'src/customer/entities/customer.entity';
 
 @Entity('orders')
 export class Order {
@@ -42,6 +42,9 @@ export class Order {
 
   @Column({ name: 'user_id' })
   userId: number;
+
+  @Column({ name: 'customer_id' })
+  customerId: string;
 
   @Column()
   distance: number;
@@ -99,4 +102,9 @@ export class Order {
 
   @OneToMany(() => OrderReference, orderReference => orderReference.order)
   orderReferences: OrderReference[];
+
+  // Relación con Customer
+  @ManyToOne(() => Customer, customer => customer.orders) // Un cliente puede tener muchas órdenes
+  @JoinColumn({ name: 'customer_id' }) // Columna en la tabla `orders` que referencia al cliente
+  customer: Customer; // Propiedad para acceder al cliente desde la orden
 }

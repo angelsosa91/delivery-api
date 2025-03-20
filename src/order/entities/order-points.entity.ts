@@ -1,7 +1,7 @@
 import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
 
-@Entity('mp_detalle_puntos')
-export class OrderPoints {
+@Entity('order_points')
+export class OrderPoint {
     @PrimaryGeneratedColumn('uuid')
     id: string;
 

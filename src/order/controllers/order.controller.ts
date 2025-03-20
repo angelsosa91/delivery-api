@@ -59,15 +59,4 @@ import {
     removeOrder(@Param('id') id: string) {
       return this.orderService.removeOrder(id);
     }
-  
-    // Endpoints para Referencias
-    @Post('references')
-    createOrderReference(@Body() orderReferenceDto: OrderReferenceDto) {
-      return this.orderService.createOrderReference(orderReferenceDto);
-    }
-  
-    @Get('references/:orderId')
-    findOrderReferencesByOrder(@Param('orderId') orderId: string) {
-      return this.orderService.findOrderReferenceByOrder(orderId);
-    }
   }

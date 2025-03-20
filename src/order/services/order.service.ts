@@ -7,31 +7,87 @@ import { OrderDto } from '../dto/order.dto';
 import { OrderReferenceDto } from '../dto/order-reference.dto';
 import { UsersService } from '../../auth/services/users.service';
 import { GoogleMapsService } from '../../utils/services/google-maps.service';
+import { CustomerService } from 'src/customer/services/customer.service';
+import { OrderPoint } from '../entities/order-points.entity';
 
 @Injectable()
 export class OrderService {
+  //constantes
+  private readonly SERVICE_TYPE: string = 'DELIVERY';
+
+  //constructor
   constructor(
     @InjectRepository(Order)
     private orderRepository: Repository<Order>,
-
     @InjectRepository(OrderReference)
     private orderReferenceRepository: Repository<OrderReference>,
+    @InjectRepository(OrderPoint)
+    private orderPointRepository: Repository<OrderPoint>,
 
     private readonly userService: UsersService,
+    private readonly customerService: CustomerService,
     private readonly googleMapsService: GoogleMapsService
   ) {}
 
-  // Métodos para Pedidos
+  // Crear Orden
   async createOrder(orderDto: OrderDto, authId: string): Promise<Order> {
-    const origin = orderDto.latitudeFrom+','+orderDto.longitudeFrom;
-    const destination = orderDto.latitudeTo+','+orderDto.longitudeTo;
+    const { order } = await this.prepareOrderData(orderDto, authId);
+    const savedOrder = await this.orderRepository.save(order);
+    await this.saveOrderReferences(savedOrder, orderDto.references);
+    return savedOrder;
+  }
+
+  // Actualizar Orden
+  async updateOrder(id: string, orderDto: OrderDto, authId: string): Promise<Order> {
+    const { order } = await this.prepareOrderData(orderDto, authId);
+    const existingOrder = await this.findOneOrder(id);
+    this.orderRepository.merge(existingOrder, order);
+    const updatedOrder = await this.orderRepository.save(existingOrder);
+    await this.saveOrderReferences(updatedOrder, orderDto.references);
+    return updatedOrder;
+  }
+
+  // Método auxiliar para preparar datos comunes
+  private async prepareOrderData(orderDto: OrderDto, authId: string): Promise<{ order: Order; distance: number; amount: number }> {
+    await this.validateCustomerInputs(orderDto);
+    const origin = orderDto.latitudeFrom + ',' + orderDto.longitudeFrom;
+    const destination = orderDto.latitudeTo + ',' + orderDto.longitudeTo;
     const data = await this.calcularDistancia(origin, destination);
     const distance = Math.round(Math.floor(data.rows[0].elements[0].distance.value / 1000));
-    //const duration = data.rows[0].elements[0].duration.value;
-    const amount = this.calcularMonto(distance, 'DELIVERY');
+    const amount = this.calcularMonto(distance, this.SERVICE_TYPE);
     const userId = await this.getUserId(authId);
     const order = this.mapToEntity(orderDto, userId, distance, amount);
-    return this.orderRepository.save(order);
+    return { order, distance, amount };
+  }
+
+  // Método auxiliar para guardar o actualizar referencias
+  private async saveOrderReferences(order: Order, referencesDto: OrderReferenceDto[]): Promise<void> {
+    await this.deleteReferencesByOrder(order.id);
+    if (referencesDto && referencesDto.length > 0) {
+      const orderReferences = referencesDto.map(referenceDto => {
+        const orderReference = this.mapToOrderReference(referenceDto);
+        orderReference.order = order;
+        return orderReference;
+      });
+      await this.orderReferenceRepository.save(orderReferences);
+    }
+  }
+
+  async removeOrder(id: string): Promise<void> {
+    const pedido = await this.findOneOrder(id);
+    await this.orderRepository.remove(pedido);
+  }
+
+  async deleteReferencesByOrder(orderId: string): Promise<void> {
+    // Buscar todas las referencias asociadas a la orden
+    const references = await this.orderReferenceRepository.find({
+        where: { orderId: orderId },
+    });
+
+    // Si hay referencias, eliminarlas
+    if (references.length > 0) {
+        await this.orderReferenceRepository.remove(references);
+    }
   }
 
   async findAllOrders(): Promise<Order[]> {
@@ -61,38 +117,32 @@ export class OrderService {
     return pedido;
   }
 
-  async updateOrder(id: string, orderDto: OrderDto, authId: string): Promise<Order> {
-    const origin = orderDto.latitudeFrom+','+orderDto.longitudeFrom;
-    const destination = orderDto.latitudeTo+','+orderDto.longitudeTo;
-    const data = await this.calcularDistancia(origin, destination);
-    const distance = Math.round(Math.floor(data.rows[0].elements[0].distance.value / 1000));
-    //const duration = data.rows[0].elements[0].duration.value;
-    const amount = this.calcularMonto(distance, 'DELIVERY');
-    const userId = await this.getUserId(authId);
-    const order = await this.findOneOrder(id);
-    this.orderRepository.merge(order, this.mapToEntity(orderDto, userId, distance, amount));
-    return this.orderRepository.save(order);
-  }
-
-  async removeOrder(id: string): Promise<void> {
-    const pedido = await this.findOneOrder(id);
-    await this.orderRepository.remove(pedido);
-  }
-
-  // Métodos para PedidosReferencia
-  async createOrderReference(orderReferenceDto: OrderReferenceDto): Promise<OrderReference> {
-    // Verificar si existe el pedido
-    await this.findOneOrder(orderReferenceDto.orderId);
-    
-    const orderReference = this.mapToOrderReference(orderReferenceDto);
-    return this.orderReferenceRepository.save(orderReference);
-  }
-
-  async findOrderReferenceByOrder(orderId: string): Promise<OrderReference[]> {
-    return this.orderReferenceRepository.find({
-      where: { orderId: orderId },
-      relations: ['order'],
-    });
+  async validateCustomerInputs(orderDto: OrderDto){
+    // Validar si el customerId está presente
+    if (orderDto.customerId) {
+      // Verificar si el customerId es válido y existe en la base de datos
+      const customer = await this.customerService.findOneCustomer(orderDto.customerId);
+      if (!customer) {
+        throw new Error('Cliente no encontrado');
+      }
+      //rellenar campos
+      orderDto.receiverName = !orderDto.receiverName ? customer.fullName : orderDto.receiverName; 
+      orderDto.receiverPhone = !orderDto.receiverPhone ? customer.phone : orderDto.receiverPhone;
+      orderDto.latitudeFrom = !orderDto.latitudeFrom ? customer.latitude : orderDto.latitudeFrom;
+      orderDto.longitudeFrom = !orderDto.longitudeFrom ? customer.longitude : orderDto.longitudeFrom;
+    } else {
+      // Si no hay customerId, validar que los campos requeridos estén presentes
+      if (
+        !orderDto.receiverName ||
+        !orderDto.receiverPhone ||
+        !orderDto.latitudeFrom ||
+        !orderDto.longitudeFrom
+      ) {
+        throw new Error(
+          'Si no se proporciona un customerId, los campos receiverName, receiverPhone, latitudeFrom y longitudeFrom son obligatorios',
+        );
+      }
+    }
   }
 
   mapToEntity(orderDto: OrderDto, userId: number, distance: number, amount: number): Order {
@@ -139,11 +189,9 @@ export class OrderService {
     const orderReference = new OrderReference();
 
     // Mapear los valores del DTO a la entidad
-    orderReference.orderId = orderReferenceDto.orderId;
     orderReference.documentNumber = orderReferenceDto.documentNumber;
     orderReference.scheduledDate = new Date(orderReferenceDto.scheduledDate);
     orderReference.observation = orderReferenceDto.observation;
-    orderReference.image = orderReferenceDto.image;
 
     // Aquí puedes rellenar los demás campos que no vienen del DTO
     orderReference.status = 'PENDIENTE'; // Por ejemplo, el estado por defecto

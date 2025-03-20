@@ -1,20 +1,30 @@
-import { IsNotEmpty, IsString, IsNumber, IsOptional, IsEnum, IsDateString } from 'class-validator';
+import { IsNotEmpty, IsString, IsNumber, IsOptional, IsEnum, IsDateString, IsArray, ValidateNested } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { OrderReferenceDto } from './order-reference.dto';
+import { Type } from 'class-transformer';
 
 export class OrderDto {
-  @ApiProperty({ 
+  @ApiPropertyOptional({ 
+    description: 'CustomerId',
+    example: 'Id Cliente'
+  })
+  @IsOptional()
+  @IsString()
+  customerId: string;
+
+  @ApiPropertyOptional({ 
     description: 'Nombre Receptor',
     example: 'Juan Perez'
   })
-  @IsNotEmpty()
+  @IsOptional()
   @IsString()
   receiverName: string;
 
-  @ApiProperty({ 
+  @ApiPropertyOptional({ 
     description: 'Teléfono Receptor',
     example: '0982335511'
   })
-  @IsNotEmpty()
+  @IsOptional()
   @IsString()
   receiverPhone: string;
 
@@ -42,19 +52,19 @@ export class OrderDto {
   @IsString()
   senderPhone: string;
 
-  @ApiProperty({ 
+  @ApiPropertyOptional({ 
     description: 'Latitud',
     example: '-25.3298328'
   })
-  @IsNotEmpty()
+  @IsOptional()
   @IsString()
   latitudeFrom: string;
 
-  @ApiProperty({ 
+  @ApiPropertyOptional({ 
     description: 'Longitud',
     example: '-57.5690995'
   })
-  @IsNotEmpty()
+  @IsOptional()
   @IsString()
   longitudeFrom: string;
 
@@ -153,4 +163,13 @@ export class OrderDto {
   @IsNotEmpty()
   @IsEnum(['SI', 'NO'])
   bank: string;
+
+  @ApiProperty({ 
+    description: 'Lista de referencias del pedido',
+    type: [OrderReferenceDto], // Indica que es un array de OrderReferenceDto
+  })
+  @IsArray()
+  @ValidateNested({ each: true }) // Valida cada objeto en el array
+  @Type(() => OrderReferenceDto) // Transforma cada objeto a OrderReferenceDto
+  references: OrderReferenceDto[];
 }

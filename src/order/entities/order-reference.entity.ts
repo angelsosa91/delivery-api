@@ -18,11 +18,8 @@ export class OrderReference {
     @Column({ name: 'scheduledDate', type: 'timestamp', nullable: true })
     scheduledDate: Date;
 
-    @Column({ length: 100, nullable: true })
+    @Column({ length: 255, nullable: true })
     observation: string;
-
-    @Column({ length: 100, nullable: true })
-    image: string;
 
     // Relaciones
     @ManyToOne(() => Order, order => order.orderReferences)

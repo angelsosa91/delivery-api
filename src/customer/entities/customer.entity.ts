@@ -1,4 +1,5 @@
-import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
+import { Order } from 'src/order/entities/order.entity';
+import { Entity, Column, PrimaryGeneratedColumn, OneToMany } from 'typeorm';
 
 @Entity('customer')
 export class Customer {
@@ -31,4 +32,8 @@ export class Customer {
 
     @Column({ length: 255, nullable: true })
     references: string;
+
+    // Relación con Order
+    @OneToMany(() => Order, order => order.customer) // Un cliente puede tener muchas órdenes
+    orders: Order[]; // Propiedad para acceder a las órdenes desde el cliente
 }
