@@ -173,6 +173,14 @@ export class OrderDto {
   bank: string;
 
   @ApiProperty({ 
+    description: 'Disparar evento para realizar pedido de envio a AhoraiteYa directamente',
+    example: 'SI/NO'
+  })
+  @IsNotEmpty()
+  @IsEnum(['SI', 'NO'])
+  directEvent: string;
+
+  @ApiProperty({ 
     description: 'Lista de referencias del pedido',
     type: [OrderReferenceDto], // Indica que es un array de OrderReferenceDto
   })

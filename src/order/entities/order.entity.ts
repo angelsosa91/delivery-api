@@ -94,6 +94,9 @@ export class Order {
   @Column({ type: 'enum', enum: ['SI', 'NO'], default: 'NO', name: 'bank' })
   bank: string;
 
+  @Column({ type: 'enum', enum: ['SI', 'NO'], default: 'NO', name: 'direct_event' })
+  directEvent: string;
+
   @Column({ default: 0, name: 'sender_vip' })
   senderVip: number;
 

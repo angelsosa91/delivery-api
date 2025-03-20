@@ -272,6 +272,7 @@ export class OrderService {
     order.invoiceName = orderDto.invoiceName;
     order.wallet = orderDto.wallet;
     order.bank = orderDto.bank;
+    order.directEvent = orderDto.directEvent;
 
     // Aquí puedes rellenar los demás campos que no vienen del DTO
     order.status = this.SERVICE_STATUS; // Por ejemplo, el estado por defecto
