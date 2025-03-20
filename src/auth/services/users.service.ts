@@ -15,7 +15,7 @@ export class UsersService {
   /**
    * Crear un nuevo usuario
    */
-  async create(createUserDto: CreateUserDto): Promise<User> {
+  async create(createUserDto: CreateUserDto): Promise<void> {
     // Verificar si el email ya existe
     const existingUser = await this.usersRepository.findOne({
       where: { email: createUserDto.email },
@@ -27,7 +27,7 @@ export class UsersService {
 
     // Crear nuevo usuario
     const user = this.usersRepository.create(createUserDto);
-    return this.usersRepository.save(user);
+    this.usersRepository.save(user);
   }
 
   /**
@@ -97,7 +97,7 @@ export class UsersService {
   /**
    * Actualizar datos de usuario
    */
-  async update(id: string, updateUserDto: UpdateUserDto): Promise<User> {
+  async update(id: string, updateUserDto: UpdateUserDto): Promise<void> {
     const user = await this.findOne(id);
 
     // Verificar si el nuevo email ya existe
@@ -121,31 +121,31 @@ export class UsersService {
 
     // Actualizar campos
     Object.assign(user, updateUserDto);
-    return this.usersRepository.save(user);
+    this.usersRepository.save(user);
   }
 
   /**
    * Cambiar estado de usuario
    */
-  async updateStatus(id: string, status: UserStatus): Promise<User> {
+  async updateStatus(id: string, status: UserStatus): Promise<void> {
     const user = await this.findOne(id);
     user.status = status;
-    return this.usersRepository.save(user);
+    this.usersRepository.save(user);
   }
 
   /**
    * Cambiar rol de usuario
    */
-  async updateRole(id: string, role: UserRole): Promise<User> {
+  async updateRole(id: string, role: UserRole): Promise<void> {
     const user = await this.findOne(id);
     user.role = role;
-    return this.usersRepository.save(user);
+    this.usersRepository.save(user);
   }
 
   /**
    * Verificar email de usuario
    */
-  async verifyEmail(id: string): Promise<User> {
+  async verifyEmail(id: string): Promise<void> {
     const user = await this.findOne(id);
     
     if (user.isEmailVerified) {
@@ -153,7 +153,7 @@ export class UsersService {
     }
     
     user.isEmailVerified = true;
-    return this.usersRepository.save(user);
+    this.usersRepository.save(user);
   }
 
   /**

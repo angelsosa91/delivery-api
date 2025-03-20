@@ -48,25 +48,25 @@ export class OrderService {
 
   // Crear Orden
   @Transactional()
-  async createOrder(orderDto: OrderDto, authId: string): Promise<Order> {
+  async createOrder(orderDto: OrderDto, authId: string): Promise<void> {
     const { order } = await this.prepareOrderData(orderDto, authId);
     //const savedOrder = await this.orderRepository.save(order);
     const savedOrder = await this.entityManager.save(Order, order);
     await this.saveOrderReferences(savedOrder, orderDto.references);
     await this.saveOrderPoints(savedOrder);
-    return savedOrder;
+    //return savedOrder;
   }
 
   // Actualizar Orden
   @Transactional()
-  async updateOrder(id: string, orderDto: OrderDto, authId: string): Promise<Order> {
+  async updateOrder(id: string, orderDto: OrderDto, authId: string): Promise<void> {
     const { order } = await this.prepareOrderData(orderDto, authId);
     const existingOrder = await this.findOneOrder(id);
     this.orderRepository.merge(existingOrder, order);
     const updatedOrder = await this.orderRepository.save(existingOrder);
     await this.saveOrderReferences(updatedOrder, orderDto.references);
     await this.saveOrderPoints(updatedOrder);
-    return updatedOrder;
+    //return updatedOrder;
   }
 
   // Método auxiliar para preparar datos comunes

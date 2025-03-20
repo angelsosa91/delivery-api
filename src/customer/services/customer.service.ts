@@ -14,10 +14,10 @@ export class CustomerService {
   ) {}
 
   // Métodos para Cliente
-  async createCustomer(customerDto: CustomerDto, authId: string): Promise<Customer> {
+  async createCustomer(customerDto: CustomerDto, authId: string): Promise<void> {
     const userId = await this.getUserId(authId);
     const customer = this.mapToEntity(customerDto, userId);
-    return this.customerRepository.save(customer);
+    this.customerRepository.save(customer);
   }
 
   async findAllCustomers(): Promise<Customer[]> {
@@ -43,11 +43,11 @@ export class CustomerService {
     return customer;
   }
 
-  async updateCustomer(id: string, customerDto: CustomerDto, authId: string): Promise<Customer> {
+  async updateCustomer(id: string, customerDto: CustomerDto, authId: string): Promise<void> {
     const userId = await this.getUserId(authId);
     const customer = await this.findOneCustomer(id);
     this.customerRepository.merge(customer, this.mapToEntity(customerDto, userId));
-    return this.customerRepository.save(customer);
+    this.customerRepository.save(customer);
   }
 
   async removeCustomer(id: string): Promise<void> {

@@ -14,10 +14,10 @@ export class OriginService {
   ) {}
 
   // Métodos para Cliente
-  async createOrigin(originDto: OriginDto, authId: string): Promise<Origin> {
+  async createOrigin(originDto: OriginDto, authId: string): Promise<void> {
     const userId = await this.getUserId(authId);
     const origin = this.mapToEntity(originDto, userId);
-    return this.originRepository.save(origin);
+    this.originRepository.save(origin);
   }
 
   async findAllOrigins(): Promise<Origin[]> {
@@ -43,11 +43,11 @@ export class OriginService {
     return origin;
   }
 
-  async updateOrigin(id: string, originDto: OriginDto, authId: string): Promise<Origin> {
+  async updateOrigin(id: string, originDto: OriginDto, authId: string): Promise<void> {
     const userId = await this.getUserId(authId);
     const origin = await this.findOneOrigin(id);
     this.originRepository.merge(origin, this.mapToEntity(originDto, userId));
-    return this.originRepository.save(origin);
+    this.originRepository.save(origin);
   }
 
   async removeOrigin(id: string): Promise<void> {
