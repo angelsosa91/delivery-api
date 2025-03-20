@@ -39,8 +39,8 @@ import { OriginModule } from './origin/origin.module';
     
     // Módulos de la aplicación
     AuthModule,
-    OrderModule,
     CustomerModule,
+    OrderModule,
     OriginModule
   ],
 })

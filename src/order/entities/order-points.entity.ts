@@ -6,11 +6,14 @@ export class OrderPoint {
     @PrimaryGeneratedColumn('uuid')
     id: string;
 
-    @Column({ type: 'uuid', nullable: true, name: 'customerId' })
-    customerId: string;
-
     @Column({ type: 'uuid', name: 'order_id' })
     orderId: string;
+
+    @Column({ type: 'uuid', nullable: true, name: 'customer_id' })
+    customerId: string;
+
+    @Column({ type: 'uuid', nullable: true, name: 'origin_id' })
+    originId: string;
 
     @Column({ length: 450, nullable: true })
     name: string;

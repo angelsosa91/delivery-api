@@ -5,14 +5,17 @@ import { OrderController } from './controllers/order.controller';
 import { Order } from './entities/order.entity';
 import { OrderReference } from './entities/order-reference.entity';
 import { OrderPoint } from './entities/order-points.entity';
+import { OrderBudget } from './entities/order-budget.entity';
 import { AuthModule } from 'src/auth/auth.module';
 import { CustomerModule } from 'src/customer/customer.module';
 import { SettingsModule } from 'src/settings/settings.module';
+import { UtilsModule } from 'src/utils/utils.module';
+import { OriginModule } from 'src/origin/origin.module';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Order, OrderReference, OrderPoint]), 
-    AuthModule, CustomerModule, SettingsModule
+    TypeOrmModule.forFeature([Order, OrderReference, OrderPoint, OrderBudget]), 
+    AuthModule, CustomerModule, OriginModule, SettingsModule, UtilsModule
   ],
   controllers: [OrderController],
   providers: [OrderService],

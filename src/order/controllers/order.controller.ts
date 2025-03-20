@@ -62,7 +62,7 @@ import { OrderBudgetDto } from '../dto/order-budget.dto';
     }
 
     // Endpoints para consulta de presupuesto
-    @Post()
+    @Post('budget')
     getBudget(
       @GetUser('id') authId: string,
       @Body() orderBudgetDto: OrderBudgetDto

@@ -24,12 +24,20 @@ export class AuthService {
     userAgent?: string,
   ): Promise<{ user: Partial<User>; accessToken: string; refreshToken: string }> {
     try {
+      // Validar la contraseña
+      if (!this.validatePassword(registerDto.password)) {
+        throw new BadRequestException(
+          'La contraseña debe tener al menos 10 caracteres, 1 mayúscula, 1 minúscula, 1 número y 1 carácter especial.',
+        );
+      }
+
       // Crear usuario
       const user = await this.usersService.create({
         fullName: registerDto.fullName,
         email: registerDto.email,
         password: registerDto.password,
-        userId: registerDto.userId
+        userId: registerDto.userId,
+        companyId: registerDto.companyId
       });
 
       // Registrar evento
@@ -272,5 +280,14 @@ export class AuthService {
       });
       throw error;
     }
+  }
+
+  // Método para validar la contraseña
+  validatePassword(password: string): boolean {
+    // Expresión regular para validar la contraseña
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()]).{10,}$/;
+
+    // Verificar si la contraseña cumple con la expresión regular
+    return passwordRegex.test(password);
   }
 }

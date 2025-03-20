@@ -13,6 +13,9 @@ import { OrderBudgetResponseDto } from '../dto/order-budget-response.dto';
 import { OrderBudget } from '../entities/order-budget.entity';
 import { Transactional } from '../../utils/decorators/transactional';
 import { CalculationService } from '../../settings/services/calculation.service';
+import { Customer } from 'src/customer/entities/customer.entity';
+import { ValidationService } from 'src/utils/services/validation.service';
+import { OriginService } from 'src/origin/services/origin.service';
 
 @Injectable({ scope: Scope.REQUEST })
 export class OrderService {
@@ -38,7 +41,9 @@ export class OrderService {
 
     private readonly userService: UsersService,
     private readonly customerService: CustomerService,
-    private readonly calculationService: CalculationService
+    private readonly originService: OriginService,
+    private readonly calculationService: CalculationService,
+    private readonly validationService: ValidationService
   ) {}
 
   // Crear Orden
@@ -71,7 +76,9 @@ export class OrderService {
     const destination = orderDto.latitudeTo + ',' + orderDto.longitudeTo;
     const data = await this.calculationService.calculateDistance(origin, destination);
     const distance = Math.round(Math.floor(data.rows[0].elements[0].distance.value / 1000));
-    const amount = await this.calculationService.calculateAmount(distance, this.SERVICE_TYPE, orderDto.withReturn);
+    //console.log(distance);
+    const amount = await this.calculationService.calculateAmount(distance, this.SERVICE_TYPE, orderDto.withReturn, orderDto.wallet, orderDto.bank);
+    //console.log(amount);
     const userId = await this.userService.getUserId(authId);
     const order = this.mapToEntity(orderDto, userId, distance, amount);
     return { order, distance, amount };
@@ -93,8 +100,12 @@ export class OrderService {
 
   // Método auxiliar para guardar o actualizar puntos
   private async saveOrderPoints(order: Order): Promise<void> {
+    let customer = new Customer();
+    if (order.customerId) {
+      customer = await this.customerService.findOneCustomer(order.customerId);
+    } 
     await this.deletePointsByOrder(order.id);
-    const orderPoint = this.mapToOrderPoint(order);
+    const orderPoint = this.mapToOrderPoint(order, customer);
     orderPoint.order = order;
     //await this.orderPointRepository.save(orderPoint);
     await this.entityManager.save(OrderPoint, orderPoint);
@@ -176,19 +187,20 @@ export class OrderService {
     const origin = orderBudgetDto.latitudeFrom + ',' + orderBudgetDto.longitudeFrom;
     const destination = orderBudgetDto.latitudeTo + ',' + orderBudgetDto.longitudeTo;
     const data = await this.calculationService.calculateDistance(origin, destination);
-    const distance = data.rows[0].elements[0].distance.text;
-    const amount = await this.calculationService.calculateAmount(distance, this.SERVICE_TYPE, orderBudgetDto.withReturn);
+    const distance = Math.round(Math.floor(data.rows[0].elements[0].distance.value / 1000));
+    const distanceText = data.rows[0].elements[0].distance.text;
+    const amount = await this.calculationService.calculateAmount(distance, this.SERVICE_TYPE, orderBudgetDto.withReturn, orderBudgetDto.wallet, orderBudgetDto.bank);
     //map to
     const budget = this.mapToOrderBudget(orderBudgetDto, authId, distance, amount);
     //guardar transaccion de consulta
     await this.orderBudgetRepository.save(budget);
     //response
-    return new OrderBudgetResponseDto(distance, amount);
+    return new OrderBudgetResponseDto(distanceText, amount);
   }
 
   async validateCustomerInputs(orderDto: OrderDto){
     // Validar si el customerId está presente
-    if (orderDto.customerId) {
+    if (!this.validationService.isObjectEmptyOrNull(orderDto.customerId)) {
       // Verificar si el customerId es válido y existe en la base de datos
       const customer = await this.customerService.findOneCustomer(orderDto.customerId);
       if (!customer) {
@@ -212,17 +224,40 @@ export class OrderService {
         );
       }
     }
+    // Validar si el originId está presente
+    if (!this.validationService.isObjectEmptyOrNull(orderDto.originId)) {
+      // Verificar si el originId es válido y existe en la base de datos
+      const origin = await this.originService.findOneOrigin(orderDto.originId);
+      if (!origin) {
+        throw new Error('Origen no encontrado');
+      }
+      //rellenar campos
+      orderDto.latitudeFrom = !orderDto.latitudeFrom ? origin.latitude : orderDto.latitudeFrom; 
+      orderDto.longitudeFrom = !orderDto.longitudeFrom ? origin.longitude : orderDto.longitudeFrom;
+    } else {
+      // Si no hay originId, validar que los campos requeridos estén presentes
+      if (
+        !orderDto.latitudeFrom ||
+        !orderDto.longitudeFrom
+      ) {
+        throw new Error(
+          'Si no se proporciona un originId, los campos latitudeFrom y longitudeFrom son obligatorios',
+        );
+      }
+    }
   }
 
   mapToEntity(orderDto: OrderDto, userId: number, distance: number, amount: number): Order {
     const order = new Order();
 
     // Mapear los valores del DTO a la entidad
+    order.customerId = orderDto.customerId;
     order.receiverName = orderDto.receiverName;
     order.receiverPhone = orderDto.receiverPhone;
     order.description = orderDto.description;
     order.paymentMethod = orderDto.paymentMethod;
     order.senderPhone = orderDto.senderPhone;
+    order.originId = orderDto.originId;
     order.latitudeFrom = orderDto.latitudeFrom;
     order.longitudeFrom = orderDto.longitudeFrom;
     order.latitudeTo = orderDto.latitudeTo;
@@ -240,7 +275,6 @@ export class OrderService {
 
     // Aquí puedes rellenar los demás campos que no vienen del DTO
     order.status = this.SERVICE_STATUS; // Por ejemplo, el estado por defecto
-    order.registerDate = new Date(); // Fecha de registro actual
     order.distance = distance; // Distancia por defecto
     order.amount = amount; // Monto por defecto
     order.rating = 0; // Rating por defecto
@@ -268,14 +302,15 @@ export class OrderService {
     return orderReference;
   }
 
-  mapToOrderPoint(order: Order): OrderPoint {
+  mapToOrderPoint(order: Order, customer: Customer): OrderPoint {
     const orderPoint = new OrderPoint();
 
     // Mapear los valores del DTO a la entidad
     orderPoint.customerId = order.customerId;
+    orderPoint.originId = order.originId;
     orderPoint.orderId = order.id;
     orderPoint.name = order.receiverName;
-    orderPoint.address = !order.customer ? order.description : order.customer.address;
+    orderPoint.address = this.validationService.isObjectEmptyOrNull(customer) ? order.description : customer.address;
     orderPoint.phone = order.receiverPhone;
     orderPoint.latitude = order.latitudeTo;
     orderPoint.longitude = order.longitudeTo;
@@ -304,6 +339,8 @@ export class OrderService {
     orderBudget.distance = distance;
     orderBudget.amount = amount;
     orderBudget.withReturn = (orderBudgetDto.withReturn == 'SI' ? 1 : 0);
+    orderBudget.wallet = orderBudgetDto.wallet;
+    orderBudget.bank = orderBudgetDto.bank;
 
     // Aquí puedes rellenar los demás campos que no vienen del DTO
     orderBudget.status = this.BUDGET_STATUS;

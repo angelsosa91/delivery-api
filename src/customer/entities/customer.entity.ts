@@ -34,6 +34,6 @@ export class Customer {
     references: string;
 
     // Relación con Order
-    @OneToMany(() => Order, order => order.customer) // Un cliente puede tener muchas órdenes
-    orders: Order[]; // Propiedad para acceder a las órdenes desde el cliente
+    //@OneToMany(() => Order, order => order.customer) // Un cliente puede tener muchas órdenes
+    //orders: Order[]; // Propiedad para acceder a las órdenes desde el cliente
 }

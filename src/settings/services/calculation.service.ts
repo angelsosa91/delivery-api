@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Between, MoreThanOrEqual, Repository } from 'typeorm';
 import { TariffDistance } from '../entities/tariff-distance.entity';
 import { TariffService } from '../entities/tariff-service.entity';
 import { Configuration } from '../entities/configuration.entity';
@@ -19,21 +19,24 @@ export class CalculationService {
     private readonly googleMapsService: GoogleMapsService
   ) {}
 
-  async calculateAmount(distance: number, service: string, wreturn: string): Promise<number> {
+  async calculateAmount(distance: number, service: string, wreturn: string, wallet: string, bank: string): Promise<number> {
+    //console.log(distance + ' ' + service + ' ' + wreturn + ' ' + wallet + ' ' + bank);
     // Obtener tarifa por distancia
     const tariffDistance = await this.tariffDistanceRepository.findOne({
       where: {
-        distanceMin: distance >= 0 ? distance : 0,
-        distanceMax: distance <= 14 ? distance : Infinity,
+        distanceMin: Between(0, distance), // distanceMin <= distance
+        distanceMax: MoreThanOrEqual(distance), // distanceMax >= distance
       },
     });
+
+    console.log(tariffDistance?.baseAmount);
 
     let amount = tariffDistance ? tariffDistance.baseAmount : 0;
 
     // Aplicar tarifa adicional por distancia si es mayor a 14 km
     if (distance > 14) {
       const tariffAdd = await this.configurationRepository.findOne({
-        where: { key: 'tariff_add_per_km' },
+        where: { key: 'additional_km' },
       });
 
       if (tariffAdd) {
@@ -57,6 +60,26 @@ export class CalculationService {
       });
       if (multiplicator_return) {
         amount *= multiplicator_return.value;
+      }
+    }
+
+    // Aplicar adicional por billetera
+    if (wallet === 'SI') {
+      const plus_wallet = await this.configurationRepository.findOne({
+        where: { key: 'plus_wallet' },
+      });
+      if (plus_wallet) {
+        amount += plus_wallet.value;
+      }
+    }
+
+    // Aplicar adicional por banco
+    if (bank === 'SI') {
+      const plus_bank = await this.configurationRepository.findOne({
+        where: { key: 'plus_bank' },
+      });
+      if (plus_bank) {
+        amount += plus_bank.value;
       }
     }
 

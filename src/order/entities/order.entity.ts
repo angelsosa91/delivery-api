@@ -1,6 +1,5 @@
-import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, ManyToOne, OneToMany, JoinColumn } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, ManyToOne, OneToMany, JoinColumn, Index, UpdateDateColumn } from 'typeorm';
 import { OrderReference } from './order-reference.entity';
-import { Customer } from 'src/customer/entities/customer.entity';
 import { OrderPoint } from './order-points.entity';
 
 @Entity('orders')
@@ -20,14 +19,23 @@ export class Order {
   @Column({ length: 45, name: 'payment_method' })
   paymentMethod: string;
 
+  @Column({ name: 'user_id' })
+  userId: number;
+
   @Column({ length: 45, name: 'sender_phone' })
   senderPhone: string;
+
+  @Column({ type: 'uuid', nullable: true, name: 'origin_id' })
+  originId: string;
 
   @Column({ length: 45, name: 'latitude_from' })
   latitudeFrom: string;
 
   @Column({ length: 45, name: 'longitude_from' })
   longitudeFrom: string;
+
+  @Column({ type: 'uuid', nullable: true, name: 'customer_id' })
+  customerId: string;
 
   @Column({ length: 45, name: 'latitude_to' })
   latitudeTo: string;
@@ -38,19 +46,10 @@ export class Order {
   @Column({ length: 20, default: 'Pendiente', name: 'status' })
   status: string;
 
-  @CreateDateColumn({ name: 'register_date' })
-  registerDate: Date;
-
-  @Column({ name: 'user_id' })
-  userId: number;
-
-  @Column({ name: 'customer_id' })
-  customerId: string;
-
-  @Column()
+  @Column({ type: 'float' })
   distance: number;
 
-  @Column()
+  @Column({ type: 'float' })
   amount: number;
 
   @Column({ default: 0 })
@@ -101,6 +100,12 @@ export class Order {
   @Column({ default: 0, name: 'sender_company' })
   senderCompany: number;
 
+  @CreateDateColumn({ name: 'created_at' })
+  createdAt: Date;
+
+  @UpdateDateColumn({ name: 'updated_at' })
+  updatedAt: Date;
+
   @OneToMany(() => OrderReference, orderReference => orderReference.order)
   orderReferences: OrderReference[];
 
@@ -109,7 +114,7 @@ export class Order {
   points: OrderPoint[]; // Propiedad para acceder a las puntos desde la Orden
 
   // Relación con Customer
-  @ManyToOne(() => Customer, customer => customer.orders) // Un cliente puede tener muchas órdenes
-  @JoinColumn({ name: 'customer_id' }) // Columna en la tabla `orders` que referencia al cliente
-  customer: Customer; // Propiedad para acceder al cliente desde la orden
+  //@ManyToOne(() => Customer, customer => customer.orders, { onDelete: 'CASCADE' }) // Un cliente puede tener muchas órdenes
+  //@JoinColumn({ name: 'customer_id' }) // Columna en la tabla `orders` que referencia al cliente
+  //customer: Customer; // Propiedad para acceder al cliente desde la orden
 }

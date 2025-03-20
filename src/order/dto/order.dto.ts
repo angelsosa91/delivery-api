@@ -52,19 +52,27 @@ export class OrderDto {
   @IsString()
   senderPhone: string;
 
-  @ApiProperty({ 
+  @ApiPropertyOptional({ 
+    description: 'OriginId',
+    example: 'Id Origen'
+  })
+  @IsOptional()
+  @IsString()
+  originId: string;
+
+  @ApiPropertyOptional({ 
     description: 'Latitud',
     example: '-25.3298328'
   })
-  @IsNotEmpty()
+  @IsOptional()
   @IsString()
   latitudeFrom: string;
 
-  @ApiProperty({ 
+  @ApiPropertyOptional({ 
     description: 'Longitud',
     example: '-57.5690995'
   })
-  @IsNotEmpty()
+  @IsOptional()
   @IsString()
   longitudeFrom: string;
 

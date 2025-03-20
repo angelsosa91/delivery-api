@@ -45,6 +45,14 @@ import {
     @IsNumber()
     @IsNotEmpty({ message: 'Usuario Id asociado es requerido' })
     userId: number;
+
+    @ApiProperty({ 
+      description: 'Company Id asociado',
+      example: '1'
+    })
+    @IsNumber()
+    @IsNotEmpty({ message: 'Company Id asociado es requerido' })
+    companyId: number;
   
     @ApiPropertyOptional({ 
       description: 'Aceptación de términos y condiciones',
