@@ -1,5 +1,5 @@
 # Etapa de construcción
-FROM node:18-alpine AS builder
+FROM node:20-alpine AS builder
 
 # Instalar dependencias de compilación
 RUN apk add --no-cache python3 make g++
@@ -23,7 +23,7 @@ COPY . .
 RUN npm run build
 
 # Etapa de producción
-FROM node:18-alpine
+FROM node:20-alpine
 
 # Establecer el directorio de trabajo
 WORKDIR /app
