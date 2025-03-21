@@ -15,5 +15,5 @@ export default new DataSource({
   migrations: [__dirname + '/migrations/*{.ts,.js}'], // Cargar todas las migraciones
   synchronize: process.env.DATABASE_SYNCHRONIZE === 'true', // Convertir a booleano
   logging: process.env.DATABASE_LOGGING === 'true', // Convertir a booleano
-  migrationsRun: process.env.NODE_ENV !== 'development', // Ejecutar migraciones automáticamente en producción
+  migrationsRun: process.env.NODE_ENV !== 'development' // Ejecutar migraciones automáticamente en producción
 });
