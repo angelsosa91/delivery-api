@@ -15,7 +15,7 @@ export class UsersService {
   /**
    * Crear un nuevo usuario
    */
-  async create(createUserDto: CreateUserDto): Promise<void> {
+  async create(createUserDto: CreateUserDto): Promise<User> {
     // Verificar si el email ya existe
     const existingUser = await this.usersRepository.findOne({
       where: { email: createUserDto.email },
@@ -27,7 +27,7 @@ export class UsersService {
 
     // Crear nuevo usuario
     const user = this.usersRepository.create(createUserDto);
-    this.usersRepository.save(user);
+    return this.usersRepository.save(user);
   }
 
   /**

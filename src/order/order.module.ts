@@ -11,11 +11,12 @@ import { CustomerModule } from 'src/customer/customer.module';
 import { SettingsModule } from 'src/settings/settings.module';
 import { UtilsModule } from 'src/utils/utils.module';
 import { OriginModule } from 'src/origin/origin.module';
+import { QeueModule } from 'src/qeue/qeue.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([Order, OrderReference, OrderPoint, OrderBudget]), 
-    AuthModule, CustomerModule, OriginModule, SettingsModule, UtilsModule
+    AuthModule, CustomerModule, OriginModule, SettingsModule, UtilsModule, QeueModule
   ],
   controllers: [OrderController],
   providers: [OrderService],

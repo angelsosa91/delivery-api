@@ -16,6 +16,7 @@ import { CalculationService } from '../../settings/services/calculation.service'
 import { Customer } from 'src/customer/entities/customer.entity';
 import { ValidationService } from 'src/utils/services/validation.service';
 import { OriginService } from 'src/origin/services/origin.service';
+import { RabbitMQService } from 'src/qeue/producer/rabbitmq.service';
 
 @Injectable({ scope: Scope.REQUEST })
 export class OrderService {
@@ -24,6 +25,7 @@ export class OrderService {
   private readonly SERVICE_STATUS: string = 'Pendiente';
   private readonly REFERENCE_STATUS: string = 'PENDIENTE';
   private readonly BUDGET_STATUS: string = 'CONSULTADO';
+  private readonly MQ_QEUE: string = 'orders_qeue';
 
   //constructor
   constructor(
@@ -43,7 +45,8 @@ export class OrderService {
     private readonly customerService: CustomerService,
     private readonly originService: OriginService,
     private readonly calculationService: CalculationService,
-    private readonly validationService: ValidationService
+    private readonly validationService: ValidationService,
+    private readonly rabbitMQService: RabbitMQService
   ) {}
 
   // Crear Orden
@@ -55,13 +58,20 @@ export class OrderService {
     await this.saveOrderReferences(savedOrder, orderDto.references);
     await this.saveOrderPoints(savedOrder);
     //return savedOrder;
+    if(savedOrder.directEvent === 'SI'){
+      this.rabbitMQService.sendMessage(this.MQ_QEUE, savedOrder);
+    }
   }
 
   // Actualizar Orden
   @Transactional()
   async updateOrder(id: string, orderDto: OrderDto, authId: string): Promise<void> {
-    const { order } = await this.prepareOrderData(orderDto, authId);
     const existingOrder = await this.findOneOrder(id);
+    if(existingOrder.directEvent === 'SI'){
+      throw new Error('No puede actualizar una orden ya enviada. Gestione con ADM del Proveedor');
+    }
+    //continue
+    const { order } = await this.prepareOrderData(orderDto, authId);
     this.orderRepository.merge(existingOrder, order);
     const updatedOrder = await this.orderRepository.save(existingOrder);
     await this.saveOrderReferences(updatedOrder, orderDto.references);
