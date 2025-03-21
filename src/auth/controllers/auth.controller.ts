@@ -31,6 +31,9 @@ import {
   
     //@Public()
     @Post('register')
+    @UseGuards(JwtAuthGuard)
+    @HttpCode(HttpStatus.OK)
+    @ApiBearerAuth()
     @ApiOperation({ summary: 'Registrar un nuevo usuario' })
     @ApiResponse({ status: HttpStatus.CREATED, description: 'Usuario registrado exitosamente' })
     @ApiResponse({ status: HttpStatus.BAD_REQUEST, description: 'Datos inválidos' })
@@ -39,15 +42,15 @@ import {
       @Body() registerDto: RegisterDto,
       @Req() req: Request,
       @Res({ passthrough: true }) res: Response,
-      @Headers('Authorization') authHeader: string, // Obtener el header 'authorization'
+      //@Headers('Authorization') authHeader: string, // Obtener el header 'authorization'
     ) {
       // Definir el token estático que esperas
-      const STATIC_TOKEN = `Bearer ${process.env.STATIC_AUTH_TOKEN}`;
+      /*const STATIC_TOKEN = `Bearer ${process.env.STATIC_AUTH_TOKEN}`;
 
       // Validar el token del header
       if (!authHeader || authHeader !== STATIC_TOKEN) {
         throw new UnauthorizedException('Token inválido');
-      }
+      }*/
 
       const { user, accessToken, refreshToken } = await this.authService.register(
         registerDto,
