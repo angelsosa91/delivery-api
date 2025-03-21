@@ -37,23 +37,24 @@ async function bootstrap() {
     // Establecer prefijo global para la API
     app.setGlobalPrefix('api');
 
-    // Configurar Swagger para documentación API
-    const swaggerConfig = new DocumentBuilder()
-      .setTitle('Auth API')
-      .setDescription('API de autenticación y gestión de usuarios')
-      .setVersion('1.0')
-      .addBearerAuth()
-      .build();
+    if (process.env.NODE_ENV !== 'production') {
+      // Configurar Swagger para documentación API
+      const swaggerConfig = new DocumentBuilder()
+        .setTitle('Auth API')
+        .setDescription('API de autenticación y gestión de usuarios')
+        .setVersion('1.0')
+        .addBearerAuth()
+        .build();
 
-    const document = SwaggerModule.createDocument(app, swaggerConfig);
-    SwaggerModule.setup('api/docs', app, document);
-
+      const document = SwaggerModule.createDocument(app, swaggerConfig);
+      SwaggerModule.setup('api/docs', app, document);
+    }
     // Iniciar el servidor en el puerto configurado
     const port = configService.get('PORT', 3000);
     await app.listen(port);
     
     console.log(`Aplicación en ejecución en: http://localhost:${port}/api`);
-    console.log(`Documentación disponible en: http://localhost:${port}/api/docs`);
+    //console.log(`Documentación disponible en: http://localhost:${port}/api/docs`);
   } catch (error) {
     console.error('Error al iniciar la aplicación:', error);
     process.exit(1);
