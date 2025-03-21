@@ -34,6 +34,10 @@ COPY --from=builder /app/node_modules ./node_modules
 # Copiar el código compilado desde la etapa de construcción
 COPY --from=builder /app/dist ./dist
 
+# Copiar archivos de migraciones y DataSource
+COPY --from=builder /app/src/migrations ./src/migrations
+COPY --from=builder /app/src/data-source.ts ./src/data-source.ts
+
 # Exponer el puerto en el que corre la aplicación
 EXPOSE 3000
 
