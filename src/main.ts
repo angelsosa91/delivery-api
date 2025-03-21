@@ -35,7 +35,7 @@ async function bootstrap() {
     });
 
     // Establecer prefijo global para la API
-    app.setGlobalPrefix('api');
+    app.setGlobalPrefix('');
 
     if (process.env.NODE_ENV !== 'production') {
       // Configurar Swagger para documentación API
@@ -47,7 +47,7 @@ async function bootstrap() {
         .build();
 
       const document = SwaggerModule.createDocument(app, swaggerConfig);
-      SwaggerModule.setup('api/docs', app, document);
+      SwaggerModule.setup('docs', app, document);
     }
     // Iniciar el servidor en el puerto configurado
     const port = configService.get('PORT', 3000);
