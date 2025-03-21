@@ -9,9 +9,6 @@ services:
     env_file:
       - .env
     restart: always
-    volumes:
-      - ./:/app
-      - /app/node_modules
     networks:
       - delivery-network
 
