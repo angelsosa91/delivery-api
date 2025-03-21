@@ -47,6 +47,7 @@ COPY --from=builder /app/.env* ./
 # Crear script de inicio
 RUN echo '#!/bin/sh\n\n# Ejecutar migraciones antes de iniciar la aplicación\necho "Running database migrations..."\nnpx typeorm-ts-node-commonjs migration:run -d src/data-source.ts\n\n# Iniciar la aplicación\necho "Starting application..."\nnode dist/main.js' > start.sh
 RUN chmod +x ./start.sh
+RUN npx typeorm-ts-node-commonjs migration:run -d src/data-source.ts
 
 # Exponer el puerto en el que corre la aplicación
 EXPOSE 3000
