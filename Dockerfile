@@ -45,7 +45,7 @@ COPY --from=builder /app/src/migrations ./src/migrations
 COPY --from=builder /app/src/data-source.ts ./src/data-source.ts
 
 # Copiar archivos de configuración (ajustar según tu estructura)
-COPY --from=builder /app/.env.example ./.env.example
+# COPY --from=builder /app/.env.example ./.env.example
 COPY --from=builder /app/src/config ./src/config
 
 # Crear un script de inicio
