@@ -7,7 +7,7 @@ config();
 export default new DataSource({
   type: 'mysql',
   host: process.env.DATABASE_HOST, // Usar variables de entorno directamente
-  port: parseInt(process.env.DATABASE_PORT, 10), // Convertir a número
+  port: parseInt(process.env.DATABASE_PORT!, 10), // Convertir a número
   username: process.env.DATABASE_USERNAME,
   password: process.env.DATABASE_PASSWORD,
   database: process.env.DATABASE_DATABASE,
