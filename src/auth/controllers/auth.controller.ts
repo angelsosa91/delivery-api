@@ -29,7 +29,7 @@ import {
   export class AuthController {
     constructor(private readonly authService: AuthService) {}
   
-    @Public()
+    //@Public()
     @Post('register')
     @ApiOperation({ summary: 'Registrar un nuevo usuario' })
     @ApiResponse({ status: HttpStatus.CREATED, description: 'Usuario registrado exitosamente' })
