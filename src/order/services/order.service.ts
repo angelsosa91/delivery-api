@@ -17,6 +17,7 @@ import { Customer } from 'src/customer/entities/customer.entity';
 import { ValidationService } from 'src/utils/services/validation.service';
 import { OriginService } from 'src/origin/services/origin.service';
 import { RabbitMQService } from 'src/qeue/producer/rabbitmq.service';
+import { MailService } from 'src/mail/services/mail.service';
 
 @Injectable({ scope: Scope.REQUEST })
 export class OrderService {
@@ -46,7 +47,8 @@ export class OrderService {
     private readonly originService: OriginService,
     private readonly calculationService: CalculationService,
     private readonly validationService: ValidationService,
-    private readonly rabbitMQService: RabbitMQService
+    private readonly rabbitMQService: RabbitMQService,
+    private readonly mailService: MailService,
   ) {}
 
   // Crear Orden
@@ -60,6 +62,9 @@ export class OrderService {
     //return savedOrder;
     if(savedOrder.directEvent === 'SI'){
       this.rabbitMQService.sendMessage(this.MQ_QEUE, new Object({ id: savedOrder.id }));
+    } else {
+      const user = await this.userService.findOne(authId);
+      this.mailService.sendMail(user.email, 'NUEVA ORDEN DE API GENERADA', 'email', new Object({ user: user.fullName, subject: 'NUEVA ORDEN GENERADA', text1: 'Tienes una nueva orden de delivery generada desde el servicio de API', text2: 'ID:', text3: savedOrder.id, text4: 'Para continuar con el proceso debes confirmar', text5: 'la orden desde la plataforma Business', text6: 'Muchas Gracias', link: '#', target: '', id: savedOrder.id }));
     }
   }
 

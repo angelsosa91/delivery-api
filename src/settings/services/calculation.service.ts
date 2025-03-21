@@ -29,8 +29,6 @@ export class CalculationService {
       },
     });
 
-    console.log(tariffDistance?.baseAmount);
-
     let amount = tariffDistance ? tariffDistance.baseAmount : 0;
 
     // Aplicar tarifa adicional por distancia si es mayor a 14 km
