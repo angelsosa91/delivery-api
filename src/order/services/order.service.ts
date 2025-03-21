@@ -54,6 +54,9 @@ export class OrderService {
   // Crear Orden
   @Transactional()
   async createOrder(orderDto: OrderDto, authId: string): Promise<void> {
+    //validate env limit
+    await this.checkEnvLimitPerOrder(authId);
+    //prepare data
     const { order } = await this.prepareOrderData(orderDto, authId);
     //const savedOrder = await this.orderRepository.save(order);
     const savedOrder = await this.entityManager.save(Order, order);
@@ -71,6 +74,9 @@ export class OrderService {
   // Actualizar Orden
   @Transactional()
   async updateOrder(id: string, orderDto: OrderDto, authId: string): Promise<void> {
+    //validate env limit
+    await this.checkEnvLimitPerOrder(authId);
+    //get data
     const existingOrder = await this.findOneOrder(id);
     if(existingOrder.directEvent === 'SI'){
       throw new Error('No puede actualizar una orden ya enviada. Gestione con ADM del Proveedor');
@@ -94,7 +100,7 @@ export class OrderService {
     const durationText = data.rows[0].elements[0].duration.text;
     const amount = await this.calculationService.calculateAmount(distance, this.SERVICE_TYPE, orderDto.withReturn, orderDto.wallet, orderDto.bank);
     const userId = await this.userService.getUserId(authId);
-    const order = this.mapToEntity(orderDto, userId, distance, amount, durationText);
+    const order = this.mapToEntity(orderDto, authId, userId, distance, amount, durationText);
     return { order, distance, amount };
   }
 
@@ -197,7 +203,26 @@ export class OrderService {
     return pedido;
   }
 
+  async countBudgetByUserId(userId: string): Promise<number> {
+    const count = await this.orderBudgetRepository.count({
+      where: { userId }, // Filtra por user_id
+    });
+
+    return count;
+  }
+
+  async countOrderByAuthId(authId: string): Promise<number> {
+    const count = await this.orderRepository.count({
+      where: { authId }, // Filtra por auth_id
+    });
+
+    return count;
+  }
+
   async getBudget(orderBudgetDto: OrderBudgetDto, authId: string): Promise<OrderBudgetResponseDto> {
+    //validate env limit
+    await this.checkEnvLimitPerBudget(authId);
+    //continue
     const origin = orderBudgetDto.latitudeFrom + ',' + orderBudgetDto.longitudeFrom;
     const destination = orderBudgetDto.latitudeTo + ',' + orderBudgetDto.longitudeTo;
     const data = await this.calculationService.calculateDistance(origin, destination);
@@ -261,10 +286,11 @@ export class OrderService {
     }
   }
 
-  mapToEntity(orderDto: OrderDto, userId: number, distance: number, amount: number, durationText: string): Order {
+  mapToEntity(orderDto: OrderDto, authId: string, userId: number, distance: number, amount: number, durationText: string): Order {
     const order = new Order();
 
     // Mapear los valores del DTO a la entidad
+    order.authId = authId;
     order.customerId = orderDto.customerId;
     order.receiverName = orderDto.receiverName;
     order.receiverPhone = orderDto.receiverPhone;
@@ -362,5 +388,35 @@ export class OrderService {
     orderBudget.status = this.BUDGET_STATUS;
 
     return orderBudget;
+  }
+
+  async checkEnvLimitPerOrder(authId: string){
+    if (process.env.NODE_ENV !== 'production') {
+      const qtyOrder = await this.countOrderByAuthId(authId);
+      // Límite de 50 transacciones en sandbox
+      const limit = 50;
+      // Verificar si se ha alcanzado el límite
+      if (qtyOrder >= limit) {
+        throw new Error(
+          `Ha alcanzado el límite de ${limit} transacciones en el entorno de pruebas. ` +
+          `Transacciones actuales: Órdenes (${qtyOrder}).`,
+        );
+      }
+    }
+  }
+
+  async checkEnvLimitPerBudget(authId: string){
+    if (process.env.NODE_ENV !== 'production') {
+      const qtyBudget = await this.countBudgetByUserId(authId);
+      // Límite de 50 transacciones en sandbox
+      const limit = 50;
+      // Verificar si se ha alcanzado el límite
+      if (qtyBudget >= limit) {
+        throw new Error(
+          `Ha alcanzado el límite de ${limit} transacciones en el entorno de pruebas. ` +
+          `Presupuestos actuales: (${qtyBudget}).`,
+        );
+      }
+    }
   }
 }

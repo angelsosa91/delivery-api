@@ -7,6 +7,9 @@ export class Order {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
+  @Column({ type: 'uuid', nullable: true, name: 'auth_id' })
+  authId: string;
+
   @Column({ length: 45, name: 'receiver_name' })
   receiverName: string;
 
