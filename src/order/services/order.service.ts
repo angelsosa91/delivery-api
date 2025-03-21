@@ -86,11 +86,10 @@ export class OrderService {
     const destination = orderDto.latitudeTo + ',' + orderDto.longitudeTo;
     const data = await this.calculationService.calculateDistance(origin, destination);
     const distance = Math.round(Math.floor(data.rows[0].elements[0].distance.value / 1000));
-    //console.log(distance);
+    const durationText = data.rows[0].elements[0].duration.text;
     const amount = await this.calculationService.calculateAmount(distance, this.SERVICE_TYPE, orderDto.withReturn, orderDto.wallet, orderDto.bank);
-    //console.log(amount);
     const userId = await this.userService.getUserId(authId);
-    const order = this.mapToEntity(orderDto, userId, distance, amount);
+    const order = this.mapToEntity(orderDto, userId, distance, amount, durationText);
     return { order, distance, amount };
   }
 
@@ -257,7 +256,7 @@ export class OrderService {
     }
   }
 
-  mapToEntity(orderDto: OrderDto, userId: number, distance: number, amount: number): Order {
+  mapToEntity(orderDto: OrderDto, userId: number, distance: number, amount: number, durationText: string): Order {
     const order = new Order();
 
     // Mapear los valores del DTO a la entidad
@@ -283,18 +282,19 @@ export class OrderService {
     order.wallet = orderDto.wallet;
     order.bank = orderDto.bank;
     order.directEvent = orderDto.directEvent;
+    order.deliveryTime = durationText;
+    order.distance = distance;
+    order.amount = amount;
+    order.userId = userId;
 
     // Aquí puedes rellenar los demás campos que no vienen del DTO
     order.status = this.SERVICE_STATUS; // Por ejemplo, el estado por defecto
-    order.distance = distance; // Distancia por defecto
-    order.amount = amount; // Monto por defecto
+    order.serviceType = this.SERVICE_TYPE; // Por ejemplo, el servicio por defecto
     order.rating = 0; // Rating por defecto
-    order.deliveryTime = '0'; // Tiempo de entrega por defecto
     order.discount = 0; // Descuento por defecto
     order.orderType = 'S'; // Tipo de orden por defecto
     order.senderVip = 0; // Sender VIP por defecto
     order.senderCompany = 0; // Sender Company por defecto
-    order.userId = userId;
 
     return order;
   }

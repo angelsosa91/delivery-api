@@ -85,6 +85,9 @@ export class Order {
   @Column({ length: 255, nullable: true, name: 'invoice_name' })
   invoiceName: string;
 
+  @Column({ length: 45, name: 'service_type' })
+  serviceType: string;
+
   @Column({ type: 'enum', enum: ['S', 'M'], default: 'S', name: 'order_type' })
   orderType: string;
 
