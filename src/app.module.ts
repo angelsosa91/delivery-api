@@ -26,9 +26,14 @@ import { OriginModule } from './origin/origin.module';
         username: configService.get('database.username'),
         password: configService.get('database.password'),
         database: configService.get('database.database'),
-        entities: [__dirname + '/**/*.entity{.ts,.js}'],
+        entities: [__dirname + '/**/*.entity{.ts,.js}'], // Cargar todas las entidades
+        migrations: [__dirname + '/migrations/*{.ts,.js}'], // Cargar todas las migraciones
         synchronize: configService.get<boolean>('database.synchronize'),
         logging: configService.get<boolean>('database.logging'),
+        migrationsRun: configService.get<string>('environment') !== 'development', // Ejecutar migraciones automáticamente en producción
+        cli: {
+          migrationsDir: 'src/migrations', // Directorio donde se generan las migraciones
+        },
         // Opciones para mejorar la estabilidad de la conexión
         connectTimeout: 20000,
         keepConnectionAlive: true,
