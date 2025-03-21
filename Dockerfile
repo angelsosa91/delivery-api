@@ -4,6 +4,9 @@ FROM node:18-alpine AS builder
 # Instalar dependencias de compilación
 RUN apk add --no-cache python3 make g++
 
+# Instalar @nestjs/cli globalmente
+RUN npm install -g @nestjs/cli
+
 # Establecer el directorio de trabajo
 WORKDIR /app
 
