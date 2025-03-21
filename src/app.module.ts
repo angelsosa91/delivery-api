@@ -31,14 +31,11 @@ import { OriginModule } from './origin/origin.module';
         synchronize: configService.get<boolean>('database.synchronize'),
         logging: configService.get<boolean>('database.logging'),
         migrationsRun: configService.get<string>('environment') !== 'development', // Ejecutar migraciones automáticamente en producción
-        cli: {
-          migrationsDir: 'src/migrations', // Directorio donde se generan las migraciones
-        },
         // Opciones para mejorar la estabilidad de la conexión
-        connectTimeout: 20000,
-        keepConnectionAlive: true,
-        retryAttempts: 10,
-        retryDelay: 3000,
+        //connectTimeout: 20000,
+        //keepConnectionAlive: true,
+        //retryAttempts: 10,
+        //retryDelay: 3000,
       }),
     }),
     
