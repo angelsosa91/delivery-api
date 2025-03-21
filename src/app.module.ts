@@ -32,10 +32,10 @@ import { OriginModule } from './origin/origin.module';
         logging: configService.get<boolean>('database.logging'),
         migrationsRun: configService.get<string>('environment') !== 'development', // Ejecutar migraciones automáticamente en producción
         // Opciones para mejorar la estabilidad de la conexión
-        //connectTimeout: 20000,
-        //keepConnectionAlive: true,
-        //retryAttempts: 10,
-        //retryDelay: 3000,
+        connectTimeout: 20000,
+        keepConnectionAlive: true,
+        retryAttempts: 10,
+        retryDelay: 3000,
       }),
     }),
     

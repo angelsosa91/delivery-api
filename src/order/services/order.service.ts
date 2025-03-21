@@ -63,11 +63,13 @@ export class OrderService {
     await this.saveOrderReferences(savedOrder, orderDto.references);
     await this.saveOrderPoints(savedOrder);
     //return savedOrder;
-    if(savedOrder.directEvent === 'SI'){
-      this.rabbitMQService.sendMessage(this.MQ_QEUE, new Object({ id: savedOrder.id }));
-    } else {
-      const user = await this.userService.findOne(authId);
-      this.mailService.sendMail(user.email, 'NUEVA ORDEN DE API GENERADA', 'email', new Object({ user: user.fullName, subject: 'NUEVA ORDEN GENERADA', text1: 'Tienes una nueva orden de delivery generada desde el servicio de API', text2: 'ID:', text3: savedOrder.id, text4: 'Para continuar con el proceso debes confirmar', text5: 'la orden desde la plataforma Business', text6: 'Muchas Gracias', link: '#', target: '', id: savedOrder.id }));
+    if (process.env.NODE_ENV === 'production') {
+      if(savedOrder.directEvent === 'SI'){
+        this.rabbitMQService.sendMessage(this.MQ_QEUE, new Object({ id: savedOrder.id }));
+      } else {
+        const user = await this.userService.findOne(authId);
+        this.mailService.sendMail(user.email, 'NUEVA ORDEN DE API GENERADA', 'email', new Object({ user: user.fullName, subject: 'NUEVA ORDEN GENERADA', text1: 'Tienes una nueva orden de delivery generada desde el servicio de API', text2: 'ID:', text3: savedOrder.id, text4: 'Para continuar con el proceso debes confirmar', text5: 'la orden desde la plataforma Business', text6: 'Muchas Gracias', link: '#', target: '', id: savedOrder.id }));
+      }
     }
   }
 

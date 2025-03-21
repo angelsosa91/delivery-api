@@ -14,7 +14,7 @@ import { Exclude } from 'class-transformer';
 import * as bcrypt from 'bcrypt';
 import { RefreshToken } from './refresh-token.entity';
 import { ApiProperty } from '@nestjs/swagger';
-import { OrderBudget } from 'src/order/entities/order-budget.entity';
+import { OrderBudget } from '../../order/entities/order-budget.entity';
 
 export enum UserRole {
   ADMIN = 'admin',
