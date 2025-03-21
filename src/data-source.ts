@@ -1,5 +1,6 @@
 import { DataSource } from 'typeorm';
 import { config } from 'dotenv';
+import * as path from 'path';
 
 // Cargar variables de entorno
 config();
@@ -22,6 +23,10 @@ try {
   };
 }
 
+// Usar rutas absolutas en lugar de __dirname
+const entitiesPath = path.join(process.cwd(), 'dist', '**', '*.entity.js');
+const migrationsPath = path.join(process.cwd(), 'src', 'migrations', '*.{ts,js}');
+
 export const AppDataSource = new DataSource({
   type: 'mysql',
   host: dbConfig.host || process.env.DB_HOST,
@@ -29,8 +34,8 @@ export const AppDataSource = new DataSource({
   username: dbConfig.username || process.env.DB_USERNAME,
   password: dbConfig.password || process.env.DB_PASSWORD,
   database: dbConfig.database || process.env.DB_DATABASE,
-  entities: [__dirname + '/**/*.entity{.ts,.js}'],
-  migrations: [__dirname + '/migrations/*{.ts,.js}'],
+  entities: [entitiesPath],
+  migrations: [migrationsPath],
   synchronize: dbConfig.synchronize || process.env.DB_SYNCHRONIZE === 'true',
   logging: dbConfig.logging || process.env.DB_LOGGING === 'true',
   migrationsRun: process.env.NODE_ENV !== 'development'
