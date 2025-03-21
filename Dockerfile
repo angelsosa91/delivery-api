@@ -39,18 +39,20 @@ RUN npm ci --only=production
 
 # Copiar el código compilado y los archivos necesarios
 COPY --from=builder /app/dist ./dist
-COPY --from=builder /app/src ./src
+COPY --from=builder /app/src/migrations ./src/migrations
+COPY --from=builder /app/src/data-source.ts ./src/data-source.ts
+
+# IMPORTANTE: Copiar la carpeta completa de configuración
+COPY --from=builder /app/src/config ./src/config
 
 # Copiar archivos de configuración adicionales si existen
 COPY --from=builder /app/.env* ./
 
-# Crear script de inicio
-RUN echo '#!/bin/sh\n\n# Ejecutar migraciones antes de iniciar la aplicación\necho "Running database migrations..."\nnpx typeorm-ts-node-commonjs migration:run -d src/data-source.ts\n\n# Iniciar la aplicación\necho "Starting application..."\nnode dist/main.js' > start.sh
-RUN chmod +x ./start.sh
+# Ejecutar migraciones
 RUN npx typeorm-ts-node-commonjs migration:run -d src/data-source.ts
 
 # Exponer el puerto en el que corre la aplicación
 EXPOSE 3000
 
 # Comando para ejecutar la aplicación
-CMD ["./start.sh"]
+CMD ["node", "dist/main.js"]
