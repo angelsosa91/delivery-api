@@ -22,6 +22,9 @@ COPY . .
 # Compilar la aplicación
 RUN npm run build
 
+# Generar migraciones
+RUN npx typeorm migration:generate src/migrations/InitialMigration -d src/data-source.ts
+
 # Etapa de producción
 FROM node:20-alpine
 
