@@ -1,21 +1,27 @@
 import { DataSource } from 'typeorm';
-import { ConfigService } from '@nestjs/config';
 import { config } from 'dotenv';
 
 // Cargar variables de entorno
 config();
 
-const configService = new ConfigService();
-
 export default new DataSource({
   type: 'mysql',
-  host: configService.get('database.host'),
-  port: configService.get<number>('database.port'),
-  username: configService.get('database.username'),
-  password: configService.get('database.password'),
-  database: configService.get('database.database'),
-  entities: [__dirname + '/**/*.entity{.ts,.js}'],
-  migrations: [__dirname + '/migrations/*{.ts,.js}'],
-  synchronize: false,
-  logging: configService.get<boolean>('database.logging'),
+  host: process.env.DATABASE_HOST, // Usar variables de entorno directamente
+  port: parseInt(process.env.DATABASE_PORT, 10), // Convertir a número
+  username: process.env.DATABASE_USERNAME,
+  password: process.env.DATABASE_PASSWORD,
+  database: process.env.DATABASE_DATABASE,
+  entities: [__dirname + '/**/*.entity{.ts,.js}'], // Cargar todas las entidades
+  migrations: [__dirname + '/migrations/*{.ts,.js}'], // Cargar todas las migraciones
+  synchronize: process.env.DATABASE_SYNCHRONIZE === 'true', // Convertir a booleano
+  logging: process.env.DATABASE_LOGGING === 'true', // Convertir a booleano
+  migrationsRun: process.env.NODE_ENV !== 'development', // Ejecutar migraciones automáticamente en producción
+  cli: {
+    migrationsDir: 'src/migrations', // Directorio donde se generan las migraciones
+  },
+  // Opciones para mejorar la estabilidad de la conexión
+  connectTimeout: 20000,
+  keepConnectionAlive: true,
+  retryAttempts: 10,
+  retryDelay: 3000,
 });
