@@ -10,7 +10,7 @@ RUN npm install -g @nestjs/cli
 # Establecer el directorio de trabajo
 WORKDIR /app
 
-# Copiar los archivos de dependencias
+# Copiar package.json y package-lock.json
 COPY package*.json ./
 
 # Instalar todas las dependencias (incluyendo devDependencies)
@@ -22,10 +22,8 @@ COPY . .
 # Compilar la aplicación
 RUN npm run build
 
-# Generar migraciones si no existen
-RUN if [ ! -d "src/migrations" ] || [ -z "$(ls -A src/migrations)" ]; then \
-    npx typeorm-ts-node-commonjs migration:generate -d src/data-source.ts src/migrations/InitialMigration; \
-    fi
+# Generar migraciones
+RUN npx typeorm-ts-node-commonjs migration:generate -d src/data-source.ts src/migrations/InitialMigration
 
 # Etapa de producción
 FROM node:20-alpine
@@ -39,17 +37,15 @@ COPY --from=builder /app/package*.json ./
 # Instalar solo dependencias de producción
 RUN npm ci --only=production
 
-# Copiar el código compilado desde la etapa de construcción
+# Copiar el código compilado y los archivos necesarios
 COPY --from=builder /app/dist ./dist
-COPY --from=builder /app/src/migrations ./src/migrations
-COPY --from=builder /app/src/data-source.ts ./src/data-source.ts
+COPY --from=builder /app/src ./src
 
-# Copiar archivos de configuración (ajustar según tu estructura)
- COPY --from=builder /app/.env ./.env
-COPY --from=builder /app/src/config ./src/config
+# Copiar archivos de configuración adicionales si existen
+COPY --from=builder /app/.env* ./
 
-# Crear un script de inicio
-COPY --from=builder /app/scripts/start.sh ./
+# Crear script de inicio
+RUN echo '#!/bin/sh\n\n# Ejecutar migraciones antes de iniciar la aplicación\necho "Running database migrations..."\nnpx typeorm-ts-node-commonjs migration:run -d src/data-source.ts\n\n# Iniciar la aplicación\necho "Starting application..."\nnode dist/main.js' > start.sh
 RUN chmod +x ./start.sh
 
 # Exponer el puerto en el que corre la aplicación
