@@ -59,7 +59,7 @@ export class OrderService {
     await this.saveOrderPoints(savedOrder);
     //return savedOrder;
     if(savedOrder.directEvent === 'SI'){
-      this.rabbitMQService.sendMessage(this.MQ_QEUE, savedOrder);
+      this.rabbitMQService.sendMessage(this.MQ_QEUE, new Object({ id: savedOrder.id }));
     }
   }
 
