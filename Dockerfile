@@ -23,7 +23,7 @@ COPY . .
 RUN npm run build
 
 # Generar migraciones
-RUN npx typeorm-ts-node-commonjs migration:generate -d src/data-source.ts src/migrations/InitialMigration
+# RUN npx typeorm-ts-node-commonjs migration:generate -d src/data-source.ts src/migrations/InitialMigration
 
 # Etapa de producción
 FROM node:20-alpine
