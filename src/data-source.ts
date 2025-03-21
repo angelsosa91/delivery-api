@@ -5,15 +5,15 @@ import { config } from 'dotenv';
 config();
 
 export default new DataSource({
-  type: 'mysql',
-  host: process.env.DATABASE_HOST, // Usar variables de entorno directamente
-  port: parseInt(process.env.DATABASE_PORT!, 10), // Convertir a número
-  username: process.env.DATABASE_USERNAME,
-  password: process.env.DATABASE_PASSWORD,
-  database: process.env.DATABASE_DATABASE,
+  type: 'mysql', // O el tipo de base de datos que uses
+  host: process.env.DB_HOST, // Usar variables de entorno directamente
+  port: parseInt(process.env.DB_PORT!, 10), // Convertir a número
+  username: process.env.DB_USERNAME,
+  password: process.env.DB_PASSWORD,
+  database: process.env.DB_DATABASE,
   entities: [__dirname + '/**/*.entity{.ts,.js}'], // Cargar todas las entidades
   migrations: [__dirname + '/migrations/*{.ts,.js}'], // Cargar todas las migraciones
-  synchronize: process.env.DATABASE_SYNCHRONIZE === 'true', // Convertir a booleano
-  logging: process.env.DATABASE_LOGGING === 'true', // Convertir a booleano
-  migrationsRun: process.env.NODE_ENV !== 'development' // Ejecutar migraciones automáticamente en producción
+  synchronize: process.env.DB_SYNCHRONIZE === 'true', // Convertir a booleano
+  logging: process.env.DB_LOGGING === 'true', // Convertir a booleano
+  migrationsRun: process.env.NODE_ENV !== 'development', // Ejecutar migraciones automáticamente en producción
 });
