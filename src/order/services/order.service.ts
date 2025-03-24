@@ -65,6 +65,10 @@ export class OrderService {
     //return savedOrder;
     if (process.env.NODE_ENV === 'production') {
       if(savedOrder.directEvent === 'SI'){
+        //update order
+        savedOrder.processed = 'SI';
+        await this.entityManager.save(Order, savedOrder);
+        //send queue
         this.rabbitMQService.sendMessage(this.MQ_QUEUE, new Object({ id: savedOrder.id }));
       } else {
         const user = await this.userService.findOne(authId);
@@ -328,6 +332,7 @@ export class OrderService {
     order.orderType = 'S'; // Tipo de orden por defecto
     order.senderVip = 0; // Sender VIP por defecto
     order.senderCompany = 0; // Sender Company por defecto
+    order.processed = 'NO'; // Processed por defecto
 
     return order;
   }

@@ -109,6 +109,9 @@ export class Order {
   @Column({ default: 0, name: 'sender_company' })
   senderCompany: number;
 
+  @Column({ type: 'enum', enum: ['SI', 'NO'], default: 'NO', name: 'processed' })
+  processed: string;
+
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
 
