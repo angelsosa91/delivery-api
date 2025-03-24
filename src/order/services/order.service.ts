@@ -16,7 +16,7 @@ import { CalculationService } from '../../settings/services/calculation.service'
 import { Customer } from 'src/customer/entities/customer.entity';
 import { ValidationService } from 'src/utils/services/validation.service';
 import { OriginService } from 'src/origin/services/origin.service';
-import { RabbitMQService } from 'src/qeue/producer/rabbitmq.service';
+import { RabbitMQService } from 'src/queue/producer/rabbitmq.service';
 import { MailService } from 'src/mail/services/mail.service';
 
 @Injectable({ scope: Scope.REQUEST })
@@ -26,7 +26,7 @@ export class OrderService {
   private readonly SERVICE_STATUS: string = 'Pendiente';
   private readonly REFERENCE_STATUS: string = 'PENDIENTE';
   private readonly BUDGET_STATUS: string = 'CONSULTADO';
-  private readonly MQ_QEUE: string = 'orders_qeue';
+  private readonly MQ_QUEUE: string = 'orders_queue';
 
   //constructor
   constructor(
@@ -65,7 +65,7 @@ export class OrderService {
     //return savedOrder;
     if (process.env.NODE_ENV === 'production') {
       if(savedOrder.directEvent === 'SI'){
-        this.rabbitMQService.sendMessage(this.MQ_QEUE, new Object({ id: savedOrder.id }));
+        this.rabbitMQService.sendMessage(this.MQ_QUEUE, new Object({ id: savedOrder.id }));
       } else {
         const user = await this.userService.findOne(authId);
         this.mailService.sendMail(user.email, 'NUEVA ORDEN DE API GENERADA', 'email', new Object({ user: user.fullName, subject: 'NUEVA ORDEN GENERADA', text1: 'Tienes una nueva orden de delivery generada desde el servicio de API', text2: 'ID:', text3: savedOrder.id, text4: 'Para continuar con el proceso debes confirmar', text5: 'la orden desde la plataforma Business', text6: 'Muchas Gracias', link: '#', target: '', id: savedOrder.id }));

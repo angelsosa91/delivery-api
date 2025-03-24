@@ -11,7 +11,7 @@ import { CustomerModule } from 'src/customer/customer.module';
 import { SettingsModule } from 'src/settings/settings.module';
 import { UtilsModule } from 'src/utils/utils.module';
 import { OriginModule } from 'src/origin/origin.module';
-import { QeueModule } from 'src/qeue/qeue.module';
+import { QeueModule } from 'src/queue/queue.module';
 import { MailModule } from 'src/mail/mail.module';
 
 @Module({
