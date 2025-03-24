@@ -256,6 +256,13 @@ export class AuthService {
     userAgent?: string,
   ): Promise<void> {
     try {
+      // Validar la contraseña
+      if (!this.validatePassword(newPassword)) {
+        throw new BadRequestException(
+          'La contraseña debe tener al menos 10 caracteres, 1 mayúscula, 1 minúscula, 1 número y 1 carácter especial.',
+        );
+      }
+
       await this.usersService.changePassword(userId, currentPassword, newPassword);
       
       // Revocar todos los tokens existentes
