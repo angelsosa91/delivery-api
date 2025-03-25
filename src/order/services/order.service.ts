@@ -18,6 +18,7 @@ import { ValidationService } from 'src/utils/services/validation.service';
 import { OriginService } from 'src/origin/services/origin.service';
 import { RabbitMQService } from 'src/queue/producer/rabbitmq.service';
 import { MailService } from 'src/mail/services/mail.service';
+import { ConfigService } from 'src/utils/services/config.service';
 
 @Injectable({ scope: Scope.REQUEST })
 export class OrderService {
@@ -49,6 +50,7 @@ export class OrderService {
     private readonly validationService: ValidationService,
     private readonly rabbitMQService: RabbitMQService,
     private readonly mailService: MailService,
+    private readonly configService: ConfigService,
   ) {}
 
   // Crear Orden
@@ -63,17 +65,8 @@ export class OrderService {
     await this.saveOrderReferences(savedOrder, orderDto.references);
     await this.saveOrderPoints(savedOrder);
     //return savedOrder;
-    if (process.env.NODE_ENV === 'production') {
-      if(savedOrder.directEvent === 'SI'){
-        //update order
-        savedOrder.processed = 'SI';
-        await this.entityManager.save(Order, savedOrder);
-        //send queue
-        this.rabbitMQService.sendMessage(this.MQ_QUEUE, new Object({ id: savedOrder.id }));
-      } else {
-        const user = await this.userService.findOne(authId);
-        this.mailService.sendMail(user.email, 'NUEVA ORDEN DE API GENERADA', 'email', new Object({ user: user.fullName, subject: 'NUEVA ORDEN GENERADA', text1: 'Tienes una nueva orden de delivery generada desde el servicio de API', text2: 'ID:', text3: savedOrder.id, text4: 'Para continuar con el proceso debes confirmar', text5: 'la orden desde la plataforma Business', text6: 'Muchas Gracias', link: '#', target: '', id: savedOrder.id }));
-      }
+    if (this.configService.isProduction()) {
+      await this.handleProductionOrder(savedOrder, authId);
     }
   }
 
@@ -424,6 +417,29 @@ export class OrderService {
           `Presupuestos actuales: (${qtyBudget}).`,
         );
       }
+    }
+  }
+
+  private async handleProductionOrder(savedOrder: Order, authId: string): Promise<void> {
+    if (savedOrder.directEvent === 'SI') {
+      savedOrder.processed = 'SI';
+      await this.entityManager.save(Order, savedOrder);
+      this.rabbitMQService.sendMessage(this.MQ_QUEUE, { id: savedOrder.id });
+    } else {
+      const user = await this.userService.findOne(authId);
+      this.mailService.sendMail(user.email, 'NUEVA ORDEN DE API GENERADA', 'email', {
+        user: user.fullName,
+        subject: 'NUEVA ORDEN GENERADA',
+        text1: 'Tienes una nueva orden de delivery generada desde el servicio de API',
+        text2: 'ID:',
+        text3: savedOrder.id,
+        text4: 'Para continuar con el proceso debes confirmar',
+        text5: 'la orden desde la plataforma Business',
+        text6: 'Muchas Gracias',
+        link: '#',
+        target: '',
+        id: savedOrder.id,
+      });
     }
   }
 }
