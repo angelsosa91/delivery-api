@@ -24,10 +24,10 @@ export class OriginService {
   async createOrigin(originDto: OriginDto, authId: string): Promise<void> {
     const userId = await this.getUserId(authId);
     const origin = this.mapToEntity(originDto, userId);
-    this.originRepository.save(origin);
+    const savedOrigin = await this.originRepository.save(origin);
     //to rabbitmq
     if (this.configService.isProduction()) {
-      this.rabbitMQService.sendMessage(this.MQ_QUEUE, { id: origin.id });
+      this.rabbitMQService.sendMessage(this.MQ_QUEUE, { id: savedOrigin.id });
     }
   }
 

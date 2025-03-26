@@ -24,10 +24,10 @@ export class CustomerService {
   async createCustomer(customerDto: CustomerDto, authId: string): Promise<void> {
     const userId = await this.getUserId(authId);
     const customer = this.mapToEntity(customerDto, userId);
-    this.customerRepository.save(customer);
+    const savedCustomer = await this.customerRepository.save(customer);
     //to rabbitmq
     if (this.configService.isProduction()) {
-      this.rabbitMQService.sendMessage(this.MQ_QUEUE, { id: customer.id });
+      this.rabbitMQService.sendMessage(this.MQ_QUEUE, { id: savedCustomer.id });
     }
   }
 
