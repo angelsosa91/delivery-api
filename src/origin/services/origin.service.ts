@@ -48,6 +48,10 @@ export class OriginService {
     origin.status = 0
     this.originRepository.save(origin);
     //await this.originRepository.remove(origin);
+    //to rabbitmq
+    if (this.configService.isProduction()) {
+      this.rabbitMQService.sendMessage(this.MQ_QUEUE, { id: origin.id });
+    }
   }
 
   async findAllOrigins(): Promise<Origin[]> {

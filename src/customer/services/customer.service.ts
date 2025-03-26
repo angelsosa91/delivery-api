@@ -48,6 +48,10 @@ export class CustomerService {
     customer.status = 0;
     this.customerRepository.save(customer);
     //await this.customerRepository.remove(customer);
+    //to rabbitmq
+    if (this.configService.isProduction()) {
+      this.rabbitMQService.sendMessage(this.MQ_QUEUE, { id: customer.id });
+    }
   }
 
   async findAllCustomers(): Promise<Customer[]> {
