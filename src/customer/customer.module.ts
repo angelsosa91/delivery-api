@@ -4,11 +4,13 @@ import { CustomerService } from './services/customer.service';
 import { CustomerController } from './controllers/customer.controller';
 import { Customer } from './entities/customer.entity';
 import { AuthModule } from 'src/auth/auth.module';
+import { QeueModule } from 'src/queue/queue.module';
+import { UtilsModule } from 'src/utils/utils.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([Customer]),
-    AuthModule
+    AuthModule, QeueModule, UtilsModule
   ],
   controllers: [CustomerController],
   providers: [CustomerService],

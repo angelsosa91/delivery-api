@@ -4,13 +4,20 @@ import { Repository } from 'typeorm';
 import { Customer } from '../entities/customer.entity';
 import { CustomerDto } from '../dto/customer.dto';
 import { UsersService } from 'src/auth/services/users.service';
+import { RabbitMQService } from 'src/queue/producer/rabbitmq.service';
+import { ConfigService } from 'src/utils/services/config.service';
 
 @Injectable()
 export class CustomerService {
+  //constantes
+  private readonly MQ_QUEUE: string = 'customer_queue';
+
   constructor(
     @InjectRepository(Customer)
     private customerRepository: Repository<Customer>,
-    private readonly userService: UsersService
+    private readonly userService: UsersService,
+    private readonly rabbitMQService: RabbitMQService,
+    private readonly configService: ConfigService
   ) {}
 
   // Métodos para Cliente
@@ -18,6 +25,29 @@ export class CustomerService {
     const userId = await this.getUserId(authId);
     const customer = this.mapToEntity(customerDto, userId);
     this.customerRepository.save(customer);
+    //to rabbitmq
+    if (this.configService.isProduction()) {
+      this.rabbitMQService.sendMessage(this.MQ_QUEUE, { id: customer.id });
+    }
+  }
+
+  async updateCustomer(id: string, customerDto: CustomerDto, authId: string): Promise<void> {
+    const userId = await this.getUserId(authId);
+    const customer = await this.findOneCustomer(id);
+    this.customerRepository.merge(customer, this.mapToEntity(customerDto, userId));
+    this.customerRepository.save(customer);
+    //to rabbitmq
+    if (this.configService.isProduction()) {
+      this.rabbitMQService.sendMessage(this.MQ_QUEUE, { id: customer.id });
+    }
+  }
+
+  async removeCustomer(id: string): Promise<void> {
+    const customer = await this.findOneCustomer(id);
+    //set status disable
+    customer.status = 0;
+    this.customerRepository.save(customer);
+    //await this.customerRepository.remove(customer);
   }
 
   async findAllCustomers(): Promise<Customer[]> {
@@ -41,18 +71,6 @@ export class CustomerService {
     }
     
     return customer;
-  }
-
-  async updateCustomer(id: string, customerDto: CustomerDto, authId: string): Promise<void> {
-    const userId = await this.getUserId(authId);
-    const customer = await this.findOneCustomer(id);
-    this.customerRepository.merge(customer, this.mapToEntity(customerDto, userId));
-    this.customerRepository.save(customer);
-  }
-
-  async removeCustomer(id: string): Promise<void> {
-    const customer = await this.findOneCustomer(id);
-    await this.customerRepository.remove(customer);
   }
 
   mapToEntity(customerDto: CustomerDto, userId: number): Customer {
