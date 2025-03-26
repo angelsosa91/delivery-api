@@ -27,7 +27,7 @@ export class OrderService {
   private readonly SERVICE_STATUS: string = 'Pendiente';
   private readonly REFERENCE_STATUS: string = 'PENDIENTE';
   private readonly BUDGET_STATUS: string = 'CONSULTADO';
-  private readonly MQ_QUEUE: string = 'orders_queue';
+  private readonly MQ_QUEUE: string = 'order_queue';
 
   //constructor
   constructor(
