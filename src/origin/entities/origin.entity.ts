@@ -34,4 +34,7 @@ export class Origin {
 
     @Column({ default: 0 })
     default: number;
+
+    @Column({ default: 0, name: 'sync_id' })
+    syncId: number;
 }

@@ -33,6 +33,9 @@ export class Customer {
     @Column({ length: 255, nullable: true })
     references: string;
 
+    @Column({ default: 0, name: 'sync_id' })
+    syncId: number;
+
     // Relación con Order
     //@OneToMany(() => Order, order => order.customer) // Un cliente puede tener muchas órdenes
     //orders: Order[]; // Propiedad para acceder a las órdenes desde el cliente
