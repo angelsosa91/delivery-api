@@ -295,7 +295,6 @@ export class OrderService {
     order.receiverName = orderDto.receiverName;
     order.receiverPhone = orderDto.receiverPhone;
     order.description = orderDto.description;
-    order.paymentMethod = this.PAYMENT_METHOD; //orderDto.paymentMethod;
     order.senderPhone = orderDto.senderPhone;
     order.originId = orderDto.originId;
     order.latitudeFrom = orderDto.latitudeFrom;
@@ -320,6 +319,7 @@ export class OrderService {
     order.userId = userId;
 
     // Aquí puedes rellenar los demás campos que no vienen del DTO
+    order.paymentMethod = this.PAYMENT_METHOD; //orderDto.paymentMethod;
     order.status = this.SERVICE_STATUS; // Por ejemplo, el estado por defecto
     order.serviceType = this.SERVICE_TYPE; // Por ejemplo, el servicio por defecto
     order.rating = 0; // Rating por defecto
