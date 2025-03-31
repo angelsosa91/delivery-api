@@ -33,14 +33,14 @@ export class CalculationService {
     let amount = tariffDistance ? tariffDistance.baseAmount : 0;
 
     // Aplicar tarifa adicional por distancia si es mayor a 14 km
-    if (distance > 14) {
+    if (distance > 15) {
       let additional_key = (delivery == 'VEHICULOS_LIGEROS' ? 'additional_km_car': 'additional_km_cycle');
       const tariffAdd = await this.configurationRepository.findOne({
         where: { key: additional_key },
       });
 
       if (tariffAdd) {
-        amount += (distance - 14) * tariffAdd.value;
+        amount += (distance - 15) * tariffAdd.value;
       }
     }
 
