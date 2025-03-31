@@ -25,6 +25,7 @@ export class OrderService {
   //constantes
   private readonly SERVICE_TYPE: string = 'DELIVERY';
   private readonly SERVICE_STATUS: string = 'Pendiente';
+  private readonly PAYMENT_METHOD: string = 'Credito';
   private readonly REFERENCE_STATUS: string = 'PENDIENTE';
   private readonly BUDGET_STATUS: string = 'CONSULTADO';
   private readonly MQ_QUEUE: string = 'order_queue';
@@ -294,7 +295,7 @@ export class OrderService {
     order.receiverName = orderDto.receiverName;
     order.receiverPhone = orderDto.receiverPhone;
     order.description = orderDto.description;
-    order.paymentMethod = orderDto.paymentMethod;
+    order.paymentMethod = this.PAYMENT_METHOD; //orderDto.paymentMethod;
     order.senderPhone = orderDto.senderPhone;
     order.originId = orderDto.originId;
     order.latitudeFrom = orderDto.latitudeFrom;
@@ -312,6 +313,7 @@ export class OrderService {
     order.wallet = orderDto.wallet;
     order.bank = orderDto.bank;
     order.directEvent = orderDto.directEvent;
+    order.deliveryType = orderDto.deliveryType;
     order.deliveryTime = durationText;
     order.distance = distance;
     order.amount = amount;
@@ -383,6 +385,7 @@ export class OrderService {
     orderBudget.withReturn = (orderBudgetDto.withReturn == 'SI' ? 1 : 0);
     orderBudget.wallet = orderBudgetDto.wallet;
     orderBudget.bank = orderBudgetDto.bank;
+    orderBudget.deliveryType = orderBudgetDto.deliveryType;
 
     // Aquí puedes rellenar los demás campos que no vienen del DTO
     orderBudget.status = this.BUDGET_STATUS;
