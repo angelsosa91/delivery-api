@@ -36,6 +36,9 @@ export class OrderBudget {
   @Column({ type: 'enum', enum: ['SI', 'NO'], default: 'NO', name: 'bank' })
   bank: string;
 
+  @Column({ type: 'enum', enum: ['MOTOCICLETA', 'VEHICULOS_LIGEROS'], default: 'MOTOCICLETA', name: 'delivery_type' })
+  deliveryType: string;
+
   @Column({ length: 20, default: 'CONSULTADO', name: 'status' })
   status: string;
 

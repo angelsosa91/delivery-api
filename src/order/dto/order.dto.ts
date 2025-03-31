@@ -173,6 +173,14 @@ export class OrderDto {
   bank: string;
 
   @ApiProperty({ 
+    description: 'Categoria Vehiculo',
+    example: 'MOTOCICLETA/VEHICULOS_LIGEROS'
+  })
+  @IsNotEmpty()
+  @IsEnum(['MOTOCICLETA', 'VEHICULOS_LIGEROS'])
+  deliveryType: string;
+
+  @ApiProperty({ 
     description: 'Disparar evento para realizar pedido de envio a AhoraiteYa directamente',
     example: 'SI/NO'
   })

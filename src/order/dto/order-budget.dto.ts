@@ -57,4 +57,12 @@ export class OrderBudgetDto {
   @IsNotEmpty()
   @IsEnum(['SI', 'NO'])
   bank: string;
+
+  @ApiProperty({ 
+    description: 'Categoria Vehiculo',
+    example: 'MOTOCICLETA/VEHICULOS_LIGEROS'
+  })
+  @IsNotEmpty()
+  @IsEnum(['MOTOCICLETA', 'VEHICULOS_LIGEROS'])
+  deliveryType: string;
 }

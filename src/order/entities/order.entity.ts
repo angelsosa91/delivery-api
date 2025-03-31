@@ -103,6 +103,9 @@ export class Order {
   @Column({ type: 'enum', enum: ['SI', 'NO'], default: 'NO', name: 'direct_event' })
   directEvent: string;
 
+  @Column({ type: 'enum', enum: ['MOTOCICLETA', 'VEHICULOS_LIGEROS'], default: 'MOTOCICLETA', name: 'delivery_type' })
+  deliveryType: string;
+
   @Column({ default: 0, name: 'sender_vip' })
   senderVip: number;
 

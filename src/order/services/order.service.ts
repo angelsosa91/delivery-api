@@ -97,7 +97,7 @@ export class OrderService {
     const data = await this.calculationService.calculateDistance(origin, destination);
     const distance = Math.round(Math.floor(data.rows[0].elements[0].distance.value / 1000));
     const durationText = data.rows[0].elements[0].duration.text;
-    const amount = await this.calculationService.calculateAmount(distance, this.SERVICE_TYPE, orderDto.withReturn, orderDto.wallet, orderDto.bank);
+    const amount = await this.calculationService.calculateAmount(distance, this.SERVICE_TYPE, orderDto.deliveryType, orderDto.withReturn, orderDto.wallet, orderDto.bank);
     const userId = await this.userService.getUserId(authId);
     const order = this.mapToEntity(orderDto, authId, userId, distance, amount, durationText);
     return { order, distance, amount };
@@ -227,7 +227,7 @@ export class OrderService {
     const data = await this.calculationService.calculateDistance(origin, destination);
     const distance = Math.round(Math.floor(data.rows[0].elements[0].distance.value / 1000));
     const distanceText = data.rows[0].elements[0].distance.text;
-    const amount = await this.calculationService.calculateAmount(distance, this.SERVICE_TYPE, orderBudgetDto.withReturn, orderBudgetDto.wallet, orderBudgetDto.bank);
+    const amount = await this.calculationService.calculateAmount(distance, this.SERVICE_TYPE, orderBudgetDto.deliveryType, orderBudgetDto.withReturn, orderBudgetDto.wallet, orderBudgetDto.bank);
     //map to
     const budget = this.mapToOrderBudget(orderBudgetDto, authId, distance, amount);
     //guardar transaccion de consulta

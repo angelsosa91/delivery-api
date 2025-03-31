@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Between, MoreThanOrEqual, Repository } from 'typeorm';
+import { Between, LessThanOrEqual, MoreThanOrEqual, Repository } from 'typeorm';
 import { TariffDistance } from '../entities/tariff-distance.entity';
 import { TariffService } from '../entities/tariff-service.entity';
 import { Configuration } from '../entities/configuration.entity';
@@ -19,13 +19,14 @@ export class CalculationService {
     private readonly googleMapsService: GoogleMapsService
   ) {}
 
-  async calculateAmount(distance: number, service: string, wreturn: string, wallet: string, bank: string): Promise<number> {
+  async calculateAmount(distance: number, service: string, delivery: string, wreturn: string, wallet: string, bank: string): Promise<number> {
     //console.log(distance + ' ' + service + ' ' + wreturn + ' ' + wallet + ' ' + bank);
     // Obtener tarifa por distancia
     const tariffDistance = await this.tariffDistanceRepository.findOne({
       where: {
-        distanceMin: Between(0, distance), // distanceMin <= distance
+        distanceMin: LessThanOrEqual(distance), // distanceMin <= distance Between(0, distance),
         distanceMax: MoreThanOrEqual(distance), // distanceMax >= distance
+        deliveryType: delivery
       },
     });
 
@@ -33,8 +34,9 @@ export class CalculationService {
 
     // Aplicar tarifa adicional por distancia si es mayor a 14 km
     if (distance > 14) {
+      let additional_key = (delivery == 'VEHICULOS_LIGEROS' ? 'additional_km_car': 'additional_km_cycle');
       const tariffAdd = await this.configurationRepository.findOne({
-        where: { key: 'additional_km' },
+        where: { key: additional_key },
       });
 
       if (tariffAdd) {

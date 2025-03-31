@@ -13,4 +13,7 @@ export class TariffDistance {
 
   @Column({ type: 'float', name: 'base_amount' })
   baseAmount: number;
+
+  @Column({ type: 'enum', enum: ['MOTOCICLETA', 'VEHICULOS_LIGEROS'], default: 'MOTOCICLETA', name: 'delivery_type' })
+  deliveryType: string;
 }
