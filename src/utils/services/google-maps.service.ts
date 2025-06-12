@@ -3,7 +3,8 @@ import axios from 'axios';
 
 @Injectable()
 export class GoogleMapsService {
-  private readonly apiKey = process.env.GOOGLE_MAPS_API_KEY; // Reemplaza con tu API Key
+  // Reads the API key from the `GOOGLE_MAPS_API_KEY` environment variable
+  private readonly apiKey = process.env.GOOGLE_MAPS_API_KEY;
   private readonly baseUrl = 'https://maps.googleapis.com/maps/api/distancematrix/json';
 
   async getDistanceMatrix(origins: string, destinations: string) {
