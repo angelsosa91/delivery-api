@@ -96,7 +96,7 @@ export class OrderService {
     const origin = orderDto.latitudeFrom + ',' + orderDto.longitudeFrom;
     const destination = orderDto.latitudeTo + ',' + orderDto.longitudeTo;
     const data = await this.calculationService.calculateDistance(origin, destination);
-    const distance = Math.round(Math.floor(data.rows[0].elements[0].distance.value / 1000));
+    const distance = Math.round(data.rows[0].elements[0].distance.value / 1000);
     const durationText = data.rows[0].elements[0].duration.text;
     const amount = await this.calculationService.calculateAmount(distance, this.SERVICE_TYPE, orderDto.deliveryType, orderDto.withReturn, orderDto.wallet, orderDto.bank);
     const userId = await this.userService.getUserId(authId);
@@ -226,7 +226,7 @@ export class OrderService {
     const origin = orderBudgetDto.latitudeFrom + ',' + orderBudgetDto.longitudeFrom;
     const destination = orderBudgetDto.latitudeTo + ',' + orderBudgetDto.longitudeTo;
     const data = await this.calculationService.calculateDistance(origin, destination);
-    const distance = Math.round(Math.floor(data.rows[0].elements[0].distance.value / 1000));
+    const distance = Math.round(data.rows[0].elements[0].distance.value / 1000);
     const distanceText = data.rows[0].elements[0].distance.text;
     const amount = await this.calculationService.calculateAmount(distance, this.SERVICE_TYPE, orderBudgetDto.deliveryType, orderBudgetDto.withReturn, orderBudgetDto.wallet, orderBudgetDto.bank);
     //map to
