@@ -5,4 +5,4 @@ import { RabbitMQService } from './producer/rabbitmq.service';
   providers: [RabbitMQService],
   exports: [RabbitMQService]
 })
-export class QeueModule {}
+export class QueueModule {}
