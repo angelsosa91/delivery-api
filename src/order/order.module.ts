@@ -11,13 +11,13 @@ import { CustomerModule } from 'src/customer/customer.module';
 import { SettingsModule } from 'src/settings/settings.module';
 import { UtilsModule } from 'src/utils/utils.module';
 import { OriginModule } from 'src/origin/origin.module';
-import { QeueModule } from 'src/queue/queue.module';
+import { QueueModule } from 'src/queue/queue.module';
 import { MailModule } from 'src/mail/mail.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([Order, OrderReference, OrderPoint, OrderBudget]), 
-    AuthModule, CustomerModule, OriginModule, SettingsModule, UtilsModule, QeueModule, MailModule
+    AuthModule, CustomerModule, OriginModule, SettingsModule, UtilsModule, QueueModule, MailModule
   ],
   controllers: [OrderController],
   providers: [OrderService],
