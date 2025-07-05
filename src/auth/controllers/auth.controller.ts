@@ -29,15 +29,15 @@ import {
   export class AuthController {
     constructor(private readonly authService: AuthService) {}
   
-    //@Public()
+    @Public()
     @Post('register')
     @UseGuards(JwtAuthGuard)
     @HttpCode(HttpStatus.OK)
-    @ApiBearerAuth()
-    @ApiOperation({ summary: 'Registrar un nuevo usuario' })
-    @ApiResponse({ status: HttpStatus.CREATED, description: 'Usuario registrado exitosamente' })
-    @ApiResponse({ status: HttpStatus.BAD_REQUEST, description: 'Datos inválidos' })
-    @ApiResponse({ status: HttpStatus.CONFLICT, description: 'El email ya está en uso' })
+    //@ApiBearerAuth()
+    //@ApiOperation({ summary: 'Registrar un nuevo usuario' })
+    //@ApiResponse({ status: HttpStatus.CREATED, description: 'Usuario registrado exitosamente' })
+    //@ApiResponse({ status: HttpStatus.BAD_REQUEST, description: 'Datos inválidos' })
+    //@ApiResponse({ status: HttpStatus.CONFLICT, description: 'El email ya está en uso' })
     async register(
       @Body() registerDto: RegisterDto,
       @Req() req: Request,
