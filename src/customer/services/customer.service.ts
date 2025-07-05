@@ -55,7 +55,9 @@ export class CustomerService {
   }
 
   async findAllCustomers(): Promise<Customer[]> {
-    return this.customerRepository.find();
+    return this.customerRepository.find({
+      where: { status: 1 },
+    });
   }
 
   async findCustomersByUser(authId: string): Promise<Customer[]> {
