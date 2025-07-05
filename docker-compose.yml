@@ -1,6 +1,6 @@
 services:
   api:
-    container_name: delivery-api
+    container_name: delivery-api-prod
     build:
       context: .
       dockerfile: Dockerfile

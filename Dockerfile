@@ -23,7 +23,7 @@ COPY . .
 RUN npm run build
 
 # Generar migraciones
-# RUN npx typeorm-ts-node-commonjs migration:generate -d src/data-source.ts src/migrations/InitialMigration
+RUN npx typeorm-ts-node-commonjs migration:generate -d src/data-source.ts src/migrations/InitialMigration
 
 # Etapa de producción
 FROM node:20-alpine
@@ -50,7 +50,7 @@ COPY --from=builder /app/src/config ./src/config
 COPY --from=builder /app/.env* ./
 
 # Ejecutar migraciones
-# RUN npx typeorm-ts-node-commonjs migration:run -d src/data-source.ts
+RUN npx typeorm-ts-node-commonjs migration:run -d src/data-source.ts
 
 # Exponer el puerto en el que corre la aplicación
 EXPOSE 3000
