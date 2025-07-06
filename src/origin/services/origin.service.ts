@@ -55,13 +55,15 @@ export class OriginService {
   }
 
   async findAllOrigins(): Promise<Origin[]> {
-    return this.originRepository.find();
+    return this.originRepository.find({
+      where: { status: 1 },
+    });
   }
 
   async findOriginsByUser(authId: string): Promise<Origin[]> {
     const userId = await this.getUserId(authId);
     return this.originRepository.find({
-      where: { userId: userId },
+      where: { userId: userId, status: 1 },
     });
   }
 
