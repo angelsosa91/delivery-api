@@ -63,7 +63,7 @@ export class CustomerService {
   async findCustomersByUser(authId: string): Promise<Customer[]> {
     const userId = await this.getUserId(authId);
     return this.customerRepository.find({
-      where: { userId: userId },
+      where: { userId: userId, status: 1 },
     });
   }
 
