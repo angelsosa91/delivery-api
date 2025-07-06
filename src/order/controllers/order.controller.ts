@@ -56,10 +56,10 @@ import { OrderBudgetDto } from '../dto/order-budget.dto';
       return this.orderService.updateOrder(id, orderDto, authId);
     }
   
-    @Delete(':id')
+    /*@Delete(':id')
     removeOrder(@Param('id') id: string) {
       return this.orderService.removeOrder(id);
-    }
+    }*/
 
     // Endpoints para consulta de presupuesto
     @Post('budget')
