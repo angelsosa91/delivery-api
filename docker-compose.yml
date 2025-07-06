@@ -1,7 +1,7 @@
 services:
   api:
-    image: delivery-api:latest
-    container_name: delivery-api
+    image: integration-api:latest
+    container_name: integration-api
     build:
       context: .
       dockerfile: Dockerfile
