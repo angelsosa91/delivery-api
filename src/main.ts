@@ -41,12 +41,20 @@ async function bootstrap() {
       // Configurar Swagger para documentación API
       const swaggerConfig = new DocumentBuilder()
         .setTitle('Auth API')
-        .setDescription('API de autenticación y gestión de usuarios')
+        .setDescription('API de Integración, Servicio AhoraiteYA')
         .setVersion('1.0')
         .addBearerAuth()
         .build();
 
       const document = SwaggerModule.createDocument(app, swaggerConfig);
+
+      // Ruta para descargar el archivo JSON
+      app.use('/docs-json', (req, res) => {
+        res.setHeader('Content-Type', 'application/json');
+        res.send(document);
+      });
+
+      // Ruta de la UI de Swagger
       SwaggerModule.setup('docs', app, document);
     }
     // Iniciar el servidor en el puerto configurado

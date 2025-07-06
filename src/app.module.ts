@@ -6,9 +6,22 @@ import { AuthModule } from './auth/auth.module';
 import { OrderModule } from './order/order.module';
 import { CustomerModule } from './customer/customer.module';
 import { OriginModule } from './origin/origin.module';
+import { ThrottlerModule } from '@nestjs/throttler';
+import { APP_GUARD } from '@nestjs/core';
+import { ThrottlerGuard } from '@nestjs/throttler';
 
 @Module({
   imports: [
+    ThrottlerModule.forRootAsync({
+      useFactory: async () => ({
+        throttlers: [
+          {
+            ttl: 60,      // tiempo en segundos
+            limit: 20,    // máximo de peticiones por IP
+          },
+        ],
+      }),
+    }),
     // Configuración global con variables de entorno
     ConfigModule.forRoot({
       isGlobal: true, // Disponible en toda la aplicación
@@ -44,6 +57,12 @@ import { OriginModule } from './origin/origin.module';
     CustomerModule,
     OrderModule,
     OriginModule
+  ],
+  providers: [
+    {
+      provide: APP_GUARD,
+      useClass: ThrottlerGuard,
+    },
   ],
 })
 export class AppModule {}
