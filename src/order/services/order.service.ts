@@ -367,6 +367,7 @@ export class OrderService {
     order.senderVip = 0; // Sender VIP por defecto
     order.senderCompany = 0; // Sender Company por defecto
     order.processed = 'NO'; // Processed por defecto
+    order.syncId = 0; // Sync ID por defecto
 
     return order;
   }
