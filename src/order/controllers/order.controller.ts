@@ -70,4 +70,9 @@ import { OrderBudgetDto } from '../dto/order-budget.dto';
     ) {
       return this.orderService.getBudget(orderBudgetDto, authId);
     }
+
+    @Get('tracking/:id')
+    trackingOneOrder(@Param('id') id: string) {
+      return this.orderService.trackingOneOrder(id);
+    }
   }

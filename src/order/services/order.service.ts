@@ -6,6 +6,7 @@ import { OrderReference } from '../entities/order-reference.entity';
 import { OrderDto } from '../dto/order.dto';
 import { OrderCreatedDto } from '../dto/order-created.dto';
 import { OrderReferenceDto } from '../dto/order-reference.dto';
+import { OrderTrackingDto } from '../dto/order-tracking.dto';
 import { UsersService } from '../../auth/services/users.service';
 import { CustomerService } from 'src/customer/services/customer.service';
 import { OrderPoint } from '../entities/order-points.entity';
@@ -16,6 +17,7 @@ import { Transactional } from '../../utils/decorators/transactional';
 import { CalculationService } from '../../settings/services/calculation.service';
 import { Customer } from 'src/customer/entities/customer.entity';
 import { ValidationService } from 'src/utils/services/validation.service';
+import { OrderExternalService } from './order.external.service';
 import { OriginService } from 'src/origin/services/origin.service';
 import { RabbitMQService } from 'src/queue/producer/rabbitmq.service';
 import { MailService } from 'src/mail/services/mail.service';
@@ -50,6 +52,7 @@ export class OrderService {
     private readonly originService: OriginService,
     private readonly calculationService: CalculationService,
     private readonly validationService: ValidationService,
+    private readonly orderExternalService: OrderExternalService,
     private readonly rabbitMQService: RabbitMQService,
     private readonly mailService: MailService,
     private readonly configService: ConfigService,
@@ -209,6 +212,34 @@ export class OrderService {
     }
     
     return pedido;
+  }
+
+  async trackingOneOrder(id: string): Promise<OrderTrackingDto> {
+    const order = await this.orderRepository.findOne({ where: { id } });
+    
+    if (!order) {
+      throw new NotFoundException(`Orden con ID ${id} no encontrado`);
+    }
+
+    if (this.configService.isProduction()) {
+      const externalOrder = await this.orderExternalService.getExternalOrderById(order.syncId);
+      if (!externalOrder) {
+        throw new NotFoundException(`Orden con ID ${id} no encontrado`);
+      }
+
+      return externalOrder;
+    }
+    // Si no es producción, retornamos un DTO con los datos de la orden
+    const externalOrder = new OrderTrackingDto(
+      order.receiverName,
+      order.receiverPhone,
+      order.comments,
+      order.paymentMethod,
+      order.status,
+      'Driver Mock', // driver name
+      '0985222333' // driver phone
+    );    
+    return externalOrder;
   }
 
   async countBudgetByUserId(userId: string): Promise<number> {
