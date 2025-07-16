@@ -15,7 +15,7 @@ import {
   import { ApiTags, ApiOperation, ApiResponse, ApiOkResponse, ApiBearerAuth } from '@nestjs/swagger';
   import { Request, Response } from 'express';
   import { AuthService } from '../services/auth.service';
-  //import { RegisterDto } from '../dto/register.dto';
+  import { RegisterDto } from '../dto/register.dto';
   import { LoginDto } from '../dto/login.dto';
   import { LoginResponseDto } from '../dto/login-response.dto';
   import { ChangePasswordDto } from '../dto/change-password.dto';
@@ -30,7 +30,7 @@ import { UserResponseDto } from '../dto/user-response.dto';
   export class AuthController {
     constructor(private readonly authService: AuthService) {}
   
-    /*@Public()
+    @Public()
     @Post('register')
     @UseGuards(JwtAuthGuard)
     @HttpCode(HttpStatus.OK)
@@ -46,11 +46,14 @@ import { UserResponseDto } from '../dto/user-response.dto';
       @Headers('x-auth-admin-token') authHeader: string, // Obtener el header 'x-auth-admin-token'
     ) {
       // Definir el token estático que esperas
-      const STATIC_TOKEN = `Bearer ${process.env.STATIC_AUTH_TOKEN}`;
+      const STATIC_TOKEN = process.env.STATIC_AUTH_TOKEN;
 
       // Validar el token del header
-      if (!authHeader || authHeader !== STATIC_TOKEN) {
-        throw new UnauthorizedException('Token inválido');
+      if (!authHeader) {
+        throw new UnauthorizedException('Token Admin obligatorio');
+      }
+      if (authHeader !== STATIC_TOKEN) {
+        throw new UnauthorizedException('Token Admin inválido');
       }
 
       const { user, accessToken, refreshToken } = await this.authService.register(
@@ -67,7 +70,7 @@ import { UserResponseDto } from '../dto/user-response.dto';
         accessToken,
         message: 'Usuario registrado correctamente',
       };
-    }*/
+    }
   
     @Public()
     @Post('login')
@@ -127,7 +130,6 @@ import { UserResponseDto } from '../dto/user-response.dto';
     @Post('refresh-token')
     @HttpCode(HttpStatus.OK)
     @UseGuards(JwtRefreshGuard)
-    @ApiBearerAuth()
     @ApiOperation({ summary: 'Refrescar access token usando refresh token' })
     @ApiResponse({ status: HttpStatus.OK, description: 'Token refrescado exitosamente', type: LoginResponseDto })
     @ApiResponse({ status: HttpStatus.UNAUTHORIZED, description: 'Token inválido o expirado' })
