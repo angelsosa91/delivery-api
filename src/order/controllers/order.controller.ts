@@ -55,11 +55,12 @@ import { OrderBudgetDto } from '../dto/order-budget.dto';
     ) {
       return this.orderService.updateOrder(id, orderDto, authId);
     }
-  
-    /*@Delete(':id')
-    removeOrder(@Param('id') id: string) {
-      return this.orderService.removeOrder(id);
-    }*/
+
+    // Enpoint para eliminar un pedido
+    @Delete(':id')
+    removeOrder(@Param('id') id: string, @GetUser('id'), authId: string) {
+      return this.orderService.removeOrder(id, authId);
+    }
 
     // Endpoints para consulta de presupuesto
     @Post('budget')

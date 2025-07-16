@@ -4,6 +4,7 @@ import { Repository, EntityManager } from 'typeorm';
 import { Order } from '../entities/order.entity';
 import { OrderReference } from '../entities/order-reference.entity';
 import { OrderDto } from '../dto/order.dto';
+import { OrderCreatedDto } from '../dto/order-created.dto';
 import { OrderReferenceDto } from '../dto/order-reference.dto';
 import { UsersService } from '../../auth/services/users.service';
 import { CustomerService } from 'src/customer/services/customer.service';
@@ -56,7 +57,7 @@ export class OrderService {
 
   // Crear Orden
   @Transactional()
-  async createOrder(orderDto: OrderDto, authId: string): Promise<void> {
+  async createOrder(orderDto: OrderDto, authId: string): Promise<OrderCreatedDto> {
     //validate env limit
     await this.checkEnvLimitPerOrder(authId);
     //prepare data
@@ -69,6 +70,8 @@ export class OrderService {
     if (this.configService.isProduction()) {
       await this.handleProductionOrder(savedOrder, authId);
     }
+    //return savedOrder;
+    return new OrderCreatedDto(savedOrder.id, savedOrder.status);
   }
 
   // Actualizar Orden
@@ -78,7 +81,7 @@ export class OrderService {
     await this.checkEnvLimitPerOrder(authId);
     //get data
     const existingOrder = await this.findOneOrder(id);
-    if(existingOrder.directEvent === 'SI'){
+    if(existingOrder.directEvent === 'SI' || existingOrder.syncId > 0){
       throw new Error('No puede actualizar una orden ya enviada. Gestione con ADM del Proveedor');
     }
     //continue
@@ -132,11 +135,16 @@ export class OrderService {
   }
 
   @Transactional()
-  async removeOrder(id: string): Promise<void> {
+  async removeOrder(id: string, authId: string): Promise<void> {
+    //validate env limit
+    await this.checkEnvLimitPerOrder(authId);
     //const pedido = await this.entityManager.findOne(Order, id);
-    const pedido = await this.findOneOrder(id);
+    const existingOrder = await this.findOneOrder(id);
+    if(existingOrder.directEvent === 'SI' || existingOrder.syncId > 0){
+      throw new Error('No puede eliminar una orden ya enviada. Gestione con ADM del Proveedor');
+    }
     //await this.orderRepository.remove(pedido);
-    await this.entityManager.remove(Order, pedido);
+    await this.entityManager.remove(Order, existingOrder);
     //await this.entityManager.delete(Order, { orderId: id });
   }
 

@@ -115,6 +115,9 @@ export class Order {
   @Column({ type: 'enum', enum: ['SI', 'NO'], default: 'NO', name: 'processed' })
   processed: string;
 
+  @Column({ default: 0, name: 'sync_id' })
+  syncId: number;
+
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
 
