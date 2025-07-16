@@ -192,6 +192,7 @@ export class OrderService {
   //retorna dto
   async getAllOrders(): Promise<OrderResponseDto[]> {
     const orders = await this.orderRepository.find({
+      where: { processed: 'NO', syncId: 0 },
       relations: ['orderReferences'],
     });
 
@@ -202,7 +203,7 @@ export class OrderService {
   async getOrdersByUser(authId: string): Promise<OrderResponseDto[]> {
     const userId = await this.userService.getUserId(authId);
     const orders = await this.orderRepository.find({
-      where: { userId: userId },
+      where: { userId: userId, processed: 'NO', syncId: 0 },
       relations: ['orderReferences'],
     });
 

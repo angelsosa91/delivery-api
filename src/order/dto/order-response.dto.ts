@@ -154,6 +154,12 @@ export class OrderResponseDto {
   directEvent: string;
 
   @ApiProperty({ 
+    description: 'Ya fue enviada al sistema central como solicitud',
+    example: 'SI/NO'
+  })
+  processed: string;
+
+  @ApiProperty({ 
     description: 'Lista de referencias del pedido',
     type: [OrderReferenceResponseDto], // Indica que es un array de OrderReferenceDto
   })
