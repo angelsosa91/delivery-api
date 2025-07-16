@@ -127,9 +127,12 @@ import { UserResponseDto } from '../dto/user-response.dto';
     @Post('refresh-token')
     @HttpCode(HttpStatus.OK)
     @UseGuards(JwtRefreshGuard)
+    @ApiBearerAuth()
     @ApiOperation({ summary: 'Refrescar access token usando refresh token' })
     @ApiResponse({ status: HttpStatus.OK, description: 'Token refrescado exitosamente', type: LoginResponseDto })
     @ApiResponse({ status: HttpStatus.UNAUTHORIZED, description: 'Token inválido o expirado' })
+    @ApiResponse({ status: HttpStatus.BAD_REQUEST, description: 'Access Token obligatorio' })
+    @ApiResponse({ status: HttpStatus.INTERNAL_SERVER_ERROR, description: 'Access Token obligatorio' })
     async refreshToken(
       @Req() req: Request,
       @Res({ passthrough: true }) res: Response,
