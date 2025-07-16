@@ -47,11 +47,12 @@ import { OrderResponseDto } from '../dto/order-response.dto';
       isArray: true
     })
     //findAllOrders(@Query('userId') userId?: number) {
-    findAllOrders(@GetUser('id') authId: string) { 
+    findAllOrders(@GetUser('id') authId: string, 
+                  @Query('status') status: string = 'NO') { 
       if (authId) {
-        return this.orderService.getOrdersByUser(authId);
+        return this.orderService.getOrdersByUser(authId, status);
       }
-      return this.orderService.getAllOrders();
+      return this.orderService.getAllOrders(status);
     }
   
     @Get(':id')
