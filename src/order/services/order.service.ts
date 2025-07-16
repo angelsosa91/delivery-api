@@ -358,7 +358,7 @@ export class OrderService {
     order.userId = userId;
 
     // Aquí puedes rellenar los demás campos que no vienen del DTO
-    order.paymentMethod = this.PAYMENT_METHOD; //orderDto.paymentMethod;
+    order.paymentMethod = orderDto.paymentMethod; //this.PAYMENT_METHOD;
     order.status = this.SERVICE_STATUS; // Por ejemplo, el estado por defecto
     order.serviceType = this.SERVICE_TYPE; // Por ejemplo, el servicio por defecto
     order.rating = 0; // Rating por defecto
