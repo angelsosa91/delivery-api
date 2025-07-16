@@ -58,7 +58,7 @@ import { OrderBudgetDto } from '../dto/order-budget.dto';
 
     // Enpoint para eliminar un pedido
     @Delete(':id')
-    removeOrder(@Param('id') id: string, @GetUser('id'), authId: string) {
+    removeOrder(@Param('id') id: string, @GetUser('id') authId: string) {
       return this.orderService.removeOrder(id, authId);
     }
 
