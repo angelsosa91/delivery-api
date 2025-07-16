@@ -29,28 +29,28 @@ import {
   export class AuthController {
     constructor(private readonly authService: AuthService) {}
   
-    @Public()
+    /*@Public()
     @Post('register')
     @UseGuards(JwtAuthGuard)
     @HttpCode(HttpStatus.OK)
-    //@ApiBearerAuth()
-    //@ApiOperation({ summary: 'Registrar un nuevo usuario' })
-    //@ApiResponse({ status: HttpStatus.CREATED, description: 'Usuario registrado exitosamente' })
-    //@ApiResponse({ status: HttpStatus.BAD_REQUEST, description: 'Datos inválidos' })
-    //@ApiResponse({ status: HttpStatus.CONFLICT, description: 'El email ya está en uso' })
+    @ApiBearerAuth()
+    @ApiOperation({ summary: 'Registrar un nuevo usuario' })
+    @ApiResponse({ status: HttpStatus.CREATED, description: 'Usuario registrado exitosamente' })
+    @ApiResponse({ status: HttpStatus.BAD_REQUEST, description: 'Datos inválidos' })
+    @ApiResponse({ status: HttpStatus.CONFLICT, description: 'El email ya está en uso' })
     async register(
       @Body() registerDto: RegisterDto,
       @Req() req: Request,
       @Res({ passthrough: true }) res: Response,
-      //@Headers('Authorization') authHeader: string, // Obtener el header 'authorization'
+      @Headers('x-auth-admin-token') authHeader: string, // Obtener el header 'x-auth-admin-token'
     ) {
       // Definir el token estático que esperas
-      /*const STATIC_TOKEN = `Bearer ${process.env.STATIC_AUTH_TOKEN}`;
+      const STATIC_TOKEN = `Bearer ${process.env.STATIC_AUTH_TOKEN}`;
 
       // Validar el token del header
       if (!authHeader || authHeader !== STATIC_TOKEN) {
         throw new UnauthorizedException('Token inválido');
-      }*/
+      }
 
       const { user, accessToken, refreshToken } = await this.authService.register(
         registerDto,
@@ -66,7 +66,7 @@ import {
         accessToken,
         message: 'Usuario registrado correctamente',
       };
-    }
+    }*/
   
     @Public()
     @Post('login')

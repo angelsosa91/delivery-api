@@ -40,10 +40,17 @@ async function bootstrap() {
     if (process.env.NODE_ENV !== 'production') {
       // Configurar Swagger para documentación API
       const swaggerConfig = new DocumentBuilder()
-        .setTitle('Auth API')
+        .setTitle('AhoraiteYA API')
         .setDescription('API de Integración, Servicio AhoraiteYA')
+        .setContact('NeoSystem Paraguay S.A.', 'https://neosystem.com.py', 'info@neosystem.com.py')
         .setVersion('1.0')
-        .addBearerAuth()
+        .addBearerAuth({
+          type: 'http',
+          in: 'header',
+          name: 'Authorization',
+          scheme: 'bearer',
+          bearerFormat: 'JWT',
+        }, 'access-token')
         .build();
 
       const document = SwaggerModule.createDocument(app, swaggerConfig);
