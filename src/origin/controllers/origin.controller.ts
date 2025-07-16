@@ -9,7 +9,7 @@ import {
     UseGuards, 
     Query 
   } from '@nestjs/common';
-  import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
+  import { ApiTags, ApiOperation, ApiResponse, ApiOkResponse, ApiNotFoundResponse, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
   import { OriginService } from '../services/origin.service';
   import { OriginDto } from '../dto/origin.dto';
   import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
@@ -34,6 +34,12 @@ import {
     }
   
     @Get()
+    @ApiOkResponse({
+      description: 'Puntos de Origen encontrados',
+      type: OriginDto,
+      isArray: true
+    })
+    @ApiNotFoundResponse({ description: 'Puntos de Origen no encontrados' })
     //findOrigins(@Query('userId') userId?: number) {
     findOrigins(@GetUser('id') authId: string) {
       if (authId) {
@@ -43,6 +49,11 @@ import {
     }
   
     @Get(':id')
+    @ApiOkResponse({
+      description: 'Punto de Origen encontrado',
+      type: OriginDto
+    })
+    @ApiNotFoundResponse({ description: 'Punto de Origen no encontrada' })
     findOneOrigin(@Param('id') id: string) {
       return this.originService.findOneOrigin(id);
     }

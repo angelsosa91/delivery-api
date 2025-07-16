@@ -9,13 +9,15 @@ import {
     UseGuards,
     Query
   } from '@nestjs/common';
-  import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
+  import { ApiTags, ApiOperation, ApiResponse, ApiOkResponse, ApiNotFoundResponse, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
   import { OrderService } from '../services/order.service';
-  import { OrderDto } from '../dto/order.dto';
-  import { OrderReferenceDto } from '../dto/order-reference.dto';
   import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
   import { GetUser } from '../../auth/decorators/get-user.decorator';
-import { OrderBudgetDto } from '../dto/order-budget.dto';
+  import { OrderDto } from '../dto/order.dto';
+  import { OrderBudgetDto } from '../dto/order-budget.dto';
+  import { OrderTrackingDto } from '../dto/order-tracking.dto';
+  import { OrderCreatedDto } from '../dto/order-created.dto';
+  import { OrderBudgetResponseDto } from '../dto/order-budget-response.dto';
   
   @ApiTags('Pedidos')
   @Controller('orders')
@@ -26,6 +28,10 @@ import { OrderBudgetDto } from '../dto/order-budget.dto';
   
     // Endpoints para Pedidos
     @Post()
+    @ApiOkResponse({
+      description: 'Orden creada exitosamente',
+      type: OrderCreatedDto,
+    })
     createOrder(
       @GetUser('id') authId: string, 
       @Body() orderDto: OrderDto
@@ -34,6 +40,11 @@ import { OrderBudgetDto } from '../dto/order-budget.dto';
     }
   
     @Get()
+    @ApiOkResponse({
+      description: 'Ordenes encontradas',
+      type: OrderDto,
+      isArray: true
+    })
     //findAllOrders(@Query('userId') userId?: number) {
     findAllOrders(@GetUser('id') authId: string) { 
       if (authId) {
@@ -43,6 +54,11 @@ import { OrderBudgetDto } from '../dto/order-budget.dto';
     }
   
     @Get(':id')
+    @ApiOkResponse({
+      description: 'Orden encontrada',
+      type: OrderDto,
+    })
+    @ApiNotFoundResponse({ description: 'Orden no encontrada' })
     findOneOrder(@Param('id') id: string) {
       return this.orderService.findOneOrder(id);
     }
@@ -64,6 +80,10 @@ import { OrderBudgetDto } from '../dto/order-budget.dto';
 
     // Endpoints para consulta de presupuesto
     @Post('budget')
+    @ApiOkResponse({
+      description: 'Presupuesto generado exitosamente',
+      type: OrderBudgetResponseDto,
+    })
     getBudget(
       @GetUser('id') authId: string,
       @Body() orderBudgetDto: OrderBudgetDto
@@ -72,6 +92,11 @@ import { OrderBudgetDto } from '../dto/order-budget.dto';
     }
 
     @Get('tracking/:id')
+    @ApiOkResponse({
+      description: 'Orden Trackeada',
+      type: OrderTrackingDto,
+    })
+    @ApiNotFoundResponse({ description: 'Orden no encontrada' })
     trackingOneOrder(@Param('id') id: string) {
       return this.orderService.trackingOneOrder(id);
     }

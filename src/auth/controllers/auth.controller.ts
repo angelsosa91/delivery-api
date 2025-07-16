@@ -12,10 +12,10 @@ import {
     UnauthorizedException
   } from '@nestjs/common';
   
-  import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
+  import { ApiTags, ApiOperation, ApiResponse, ApiOkResponse, ApiBearerAuth } from '@nestjs/swagger';
   import { Request, Response } from 'express';
   import { AuthService } from '../services/auth.service';
-  import { RegisterDto } from '../dto/register.dto';
+  //import { RegisterDto } from '../dto/register.dto';
   import { LoginDto } from '../dto/login.dto';
   //import { RefreshTokenDto } from '../dto/refresh-token.dto';
   import { ChangePasswordDto } from '../dto/change-password.dto';

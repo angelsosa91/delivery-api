@@ -9,11 +9,11 @@ import {
     UseGuards, 
     Query 
   } from '@nestjs/common';
-  import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
+  import { ApiTags, ApiOperation, ApiResponse, ApiOkResponse, ApiNotFoundResponse, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
   import { CustomerService } from '../services/customer.service';
   import { CustomerDto } from '../dto/customer.dto';
   import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
-import { GetUser } from 'src/auth/decorators/get-user.decorator';
+  import { GetUser } from 'src/auth/decorators/get-user.decorator';
   
   @ApiTags('Clientes')
   @Controller('customers')
@@ -32,6 +32,12 @@ import { GetUser } from 'src/auth/decorators/get-user.decorator';
     }
   
     @Get()
+    @ApiOkResponse({
+      description: 'Clientes encontrados',
+      type: CustomerDto,
+      isArray: true
+    })
+    @ApiNotFoundResponse({ description: 'Clientes no encontrados' })
     //findCustomers(@Query('userId') userId?: number) {
     findCustomers(@GetUser('id') authId: string){
       if (authId) {
@@ -41,6 +47,11 @@ import { GetUser } from 'src/auth/decorators/get-user.decorator';
     }
   
     @Get(':id')
+    @ApiOkResponse({
+      description: 'Cliente encontrado',
+      type: CustomerDto
+    })
+    @ApiNotFoundResponse({ description: 'Cliente no encontrada' })
     findOneCustomer(@Param('id') id: string) {
       return this.customerService.findOneCustomer(id);
     }
