@@ -439,7 +439,7 @@ export class OrderService {
     dto.bank = entity.bank;
     dto.deliveryType = entity.deliveryType;
     dto.directEvent = entity.directEvent;
-    dto.processed = entity.processed;
+    dto.sync = entity.processed;
     // Mapear referencias
     dto.references = entity.orderReferences?.map(this.mapToOrderReferenceDTO) ?? [];
 

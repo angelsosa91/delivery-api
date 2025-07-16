@@ -157,7 +157,7 @@ export class OrderResponseDto {
     description: 'Ya fue enviada al sistema central como solicitud',
     example: 'SI/NO'
   })
-  processed: string;
+  sync: string;
 
   @ApiProperty({ 
     description: 'Lista de referencias del pedido',
