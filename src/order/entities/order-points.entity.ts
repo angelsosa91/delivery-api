@@ -51,8 +51,10 @@ export class OrderPoint {
     @Column({ length: 200, default: 'DELIVERY' })
     service: string;
 
-    // Relación con Customer
-    @ManyToOne(() => Order, order => order.points) // Un cliente puede tener muchas órdenes
+    // Relación con Ordenes
+    @ManyToOne(() => Order, order => order.points, {
+        onDelete: 'CASCADE', // 👈 Esto habilita el borrado en cascada
+    })
     @JoinColumn({ name: 'order_id' }) // Columna en la tabla `orders` que referencia al cliente
     order: Order; // Propiedad para acceder al cliente desde la orden
 }

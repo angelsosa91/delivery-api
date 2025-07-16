@@ -195,7 +195,8 @@ export class OrderService {
       relations: ['orderReferences'],
     });
 
-    return orders.map(this.mapToDTO);
+    //return orders.map(this.mapToDTO);
+    return orders.map(this.mapToDTO.bind(this));
   }
 
   async getOrdersByUser(authId: string): Promise<OrderResponseDto[]> {
@@ -205,7 +206,8 @@ export class OrderService {
       relations: ['orderReferences'],
     });
 
-    return orders.map(this.mapToDTO);
+    //return orders.map(this.mapToDTO);
+    return orders.map(this.mapToDTO.bind(this));
   }
 
   async getOrderById(id: string): Promise<OrderResponseDto> {

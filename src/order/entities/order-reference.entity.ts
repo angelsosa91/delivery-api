@@ -22,7 +22,9 @@ export class OrderReference {
     observation: string;
 
     // Relaciones
-    @ManyToOne(() => Order, order => order.orderReferences)
+    @ManyToOne(() => Order, order => order.orderReferences, {
+        onDelete: 'CASCADE', // 👈 Esto habilita el borrado en cascada
+    })
     @JoinColumn({ name: 'order_id' })
     order: Order;
 }
