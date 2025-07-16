@@ -101,7 +101,7 @@ export class CustomerService {
 
   async findOneCustomer(id: string): Promise<Customer> {
     const customer = await this.customerRepository.findOne({
-      where: { id },
+      where: { id, status: 1 },
     });
     
     if (!customer) {

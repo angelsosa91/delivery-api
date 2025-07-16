@@ -101,7 +101,7 @@ export class OriginService {
 
   async findOneOrigin(id: string): Promise<Origin> {
     const origin = await this.originRepository.findOne({
-      where: { id },
+      where: { id: id, status: 1 },
     });
     
     if (!origin) {
