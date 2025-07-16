@@ -75,7 +75,7 @@ export class OriginService {
 
   async getOriginById(id: string): Promise<OriginResponseDto> {
     const origin = await this.originRepository.findOne({
-      where: { id },
+      where: { id: id, status: 1 },
     });
     
     if (!origin) {

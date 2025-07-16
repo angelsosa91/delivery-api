@@ -75,7 +75,7 @@ export class CustomerService {
 
   async getCustomerById(id: string): Promise<CustomerResponseDto> {
     const customer = await this.customerRepository.findOne({
-      where: { id },
+      where: { id: id, status: 1 },
     });
     
     if (!customer) {
