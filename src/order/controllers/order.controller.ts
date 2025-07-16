@@ -48,11 +48,11 @@ import { OrderResponseDto } from '../dto/order-response.dto';
     })
     //findAllOrders(@Query('userId') userId?: number) {
     findAllOrders(@GetUser('id') authId: string, 
-                  @Query('processed') processed: string = 'NO') { 
+                  @Query('sync') sync: number = 0) { 
       if (authId) {
-        return this.orderService.getOrdersByUser(authId, processed);
+        return this.orderService.getOrdersByUser(authId, sync);
       }
-      return this.orderService.getAllOrders(processed);
+      return this.orderService.getAllOrders(sync);
     }
   
     @Get(':id')

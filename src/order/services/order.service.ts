@@ -190,9 +190,9 @@ export class OrderService {
   }
 
   //retorna dto
-  async getAllOrders(processed: string): Promise<OrderResponseDto[]> {
+  async getAllOrders(sync: number): Promise<OrderResponseDto[]> {
     const orders = await this.orderRepository.find({
-      where: { processed: processed },
+      where: { processed: sync == 1 ? 'SI' : 'NO' },
       relations: ['orderReferences'],
     });
 
@@ -200,10 +200,10 @@ export class OrderService {
     return orders.map(this.mapToDTO.bind(this));
   }
 
-  async getOrdersByUser(authId: string, processed: string): Promise<OrderResponseDto[]> {
+  async getOrdersByUser(authId: string, sync: number): Promise<OrderResponseDto[]> {
     const userId = await this.userService.getUserId(authId);
     const orders = await this.orderRepository.find({
-      where: { userId: userId, processed: processed },
+      where: { userId: userId, processed: sync == 1 ? 'SI' : 'NO' },
       relations: ['orderReferences'],
     });
 
