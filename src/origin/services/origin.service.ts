@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Origin } from '../entities/origin.entity';
 import { OriginDto } from '../dto/origin.dto';
+import { OriginResponseDto } from '../dto/origin-response.dto';
 import { UsersService } from 'src/auth/services/users.service';
 import { RabbitMQService } from 'src/queue/producer/rabbitmq.service';
 import { ConfigService } from 'src/utils/services/config.service';
@@ -54,6 +55,37 @@ export class OriginService {
     }
   }
 
+  //retorna dto
+  async getAllOrigins(): Promise<OriginResponseDto[]> {
+    const origins = await this.originRepository.find({
+      where: { status: 1 },
+    });
+
+    return origins.map(this.mapToDTO);
+  }
+
+  async getOriginsByUser(authId: string): Promise<OriginResponseDto[]> {
+    const userId = await this.getUserId(authId);
+    const origins = await this.originRepository.find({
+      where: { userId: userId, status: 1 },
+    });
+
+    return origins.map(this.mapToDTO);
+  }
+
+  async getOriginById(id: string): Promise<OriginResponseDto> {
+    const origin = await this.originRepository.findOne({
+      where: { id },
+    });
+    
+    if (!origin) {
+      throw new NotFoundException(`Origen con ID ${id} no encontrado`);
+    }
+    
+    return this.mapToDTO(origin);
+  }
+
+  //retorna entidades
   async findAllOrigins(): Promise<Origin[]> {
     return this.originRepository.find({
       where: { status: 1 },
@@ -97,6 +129,22 @@ export class OriginService {
       origin.status = 1;
   
       return origin;
+  }
+
+  mapToDTO(entity: Origin): OriginResponseDto {
+    const dto = new OriginResponseDto();
+
+    dto.id = entity.id;
+    dto.name = entity.name;
+    dto.phone = entity.phone;
+    dto.address = entity.address;
+    dto.email = entity.email;
+    dto.latitude = entity.latitude;
+    dto.longitude = entity.longitude;
+    dto.references = entity.references;
+    dto.default = entity.default === 1 ? 'SI' : 'NO'; // 👈 conversión lógica
+
+    return dto;
   }
 
   async getUserId(userId: string): Promise<number> {

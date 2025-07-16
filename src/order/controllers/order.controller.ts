@@ -18,6 +18,7 @@ import {
   import { OrderTrackingDto } from '../dto/order-tracking.dto';
   import { OrderCreatedDto } from '../dto/order-created.dto';
   import { OrderBudgetResponseDto } from '../dto/order-budget-response.dto';
+import { OrderResponseDto } from '../dto/order-response.dto';
   
   @ApiTags('Pedidos')
   @Controller('orders')
@@ -42,25 +43,25 @@ import {
     @Get()
     @ApiOkResponse({
       description: 'Ordenes encontradas',
-      type: OrderDto,
+      type: OrderResponseDto,
       isArray: true
     })
     //findAllOrders(@Query('userId') userId?: number) {
     findAllOrders(@GetUser('id') authId: string) { 
       if (authId) {
-        return this.orderService.findOrdersByUser(authId);
+        return this.orderService.getOrdersByUser(authId);
       }
-      return this.orderService.findAllOrders();
+      return this.orderService.getAllOrders();
     }
   
     @Get(':id')
     @ApiOkResponse({
       description: 'Orden encontrada',
-      type: OrderDto,
+      type: OrderResponseDto,
     })
     @ApiNotFoundResponse({ description: 'Orden no encontrada' })
     findOneOrder(@Param('id') id: string) {
-      return this.orderService.findOneOrder(id);
+      return this.orderService.getOrderById(id);
     }
   
     @Patch(':id')

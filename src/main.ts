@@ -50,7 +50,7 @@ async function bootstrap() {
           name: 'Authorization',
           scheme: 'bearer',
           bearerFormat: 'JWT',
-        }, 'access-token')
+        })
         .build();
 
       const document = SwaggerModule.createDocument(app, swaggerConfig);

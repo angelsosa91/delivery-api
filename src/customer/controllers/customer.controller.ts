@@ -12,6 +12,7 @@ import {
   import { ApiTags, ApiOperation, ApiResponse, ApiOkResponse, ApiNotFoundResponse, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
   import { CustomerService } from '../services/customer.service';
   import { CustomerDto } from '../dto/customer.dto';
+  import { CustomerResponseDto } from '../dto/customer-response.dto';
   import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
   import { GetUser } from 'src/auth/decorators/get-user.decorator';
   
@@ -34,26 +35,26 @@ import {
     @Get()
     @ApiOkResponse({
       description: 'Clientes encontrados',
-      type: CustomerDto,
+      type: CustomerResponseDto,
       isArray: true
     })
     @ApiNotFoundResponse({ description: 'Clientes no encontrados' })
     //findCustomers(@Query('userId') userId?: number) {
     findCustomers(@GetUser('id') authId: string){
       if (authId) {
-        return this.customerService.findCustomersByUser(authId);
+        return this.customerService.getCustomersByUser(authId);
       }
-      return this.customerService.findAllCustomers();
+      return this.customerService.getAllCustomers();
     }
   
     @Get(':id')
     @ApiOkResponse({
       description: 'Cliente encontrado',
-      type: CustomerDto
+      type: CustomerResponseDto
     })
     @ApiNotFoundResponse({ description: 'Cliente no encontrada' })
     findOneCustomer(@Param('id') id: string) {
-      return this.customerService.findOneCustomer(id);
+      return this.customerService.getCustomerById(id);
     }
   
     @Patch(':id')

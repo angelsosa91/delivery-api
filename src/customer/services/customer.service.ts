@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Customer } from '../entities/customer.entity';
 import { CustomerDto } from '../dto/customer.dto';
+import { CustomerResponseDto } from '../dto/customer-response.dto';
 import { UsersService } from 'src/auth/services/users.service';
 import { RabbitMQService } from 'src/queue/producer/rabbitmq.service';
 import { ConfigService } from 'src/utils/services/config.service';
@@ -54,6 +55,37 @@ export class CustomerService {
     }
   }
 
+  //return dto
+  async getAllCustomers(): Promise<CustomerResponseDto[]> {
+    const customers = await this.customerRepository.find({
+      where: { status: 1 },
+    });
+
+    return customers.map(this.mapToDTO);
+  }
+
+  async getCustomersByUser(authId: string): Promise<CustomerResponseDto[]> {
+    const userId = await this.getUserId(authId);
+    const customers = await this.customerRepository.find({
+      where: { userId: userId, status: 1 },
+    });
+
+    return customers.map(this.mapToDTO);
+  }
+
+  async getCustomerById(id: string): Promise<CustomerResponseDto> {
+    const customer = await this.customerRepository.findOne({
+      where: { id },
+    });
+    
+    if (!customer) {
+      throw new NotFoundException(`Cliente con ID ${id} no encontrado`);
+    }
+    
+    return this.mapToDTO(customer);
+  }
+
+  //return entities
   async findAllCustomers(): Promise<Customer[]> {
     return this.customerRepository.find({
       where: { status: 1 },
@@ -96,6 +128,21 @@ export class CustomerService {
       customer.status = 1;
   
       return customer;
+  }
+
+  mapToDTO(entity: Customer): CustomerResponseDto {
+      const dto = new CustomerResponseDto();
+
+      dto.id = entity.id;
+      dto.fullName = entity.fullName;
+      dto.phone = entity.phone;
+      dto.address = entity.address;
+      dto.email = entity.email;
+      dto.latitude = entity.latitude;
+      dto.longitude = entity.longitude;
+      dto.references = entity.references;
+  
+      return dto;
   }
 
   async getUserId(userId: string): Promise<number> {

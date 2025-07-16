@@ -12,6 +12,7 @@ import {
   import { ApiTags, ApiOperation, ApiResponse, ApiOkResponse, ApiNotFoundResponse, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
   import { OriginService } from '../services/origin.service';
   import { OriginDto } from '../dto/origin.dto';
+  import { OriginResponseDto } from '../dto/origin-response.dto';
   import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
   import { GetUser } from '../../auth/decorators/get-user.decorator';
   
@@ -36,26 +37,26 @@ import {
     @Get()
     @ApiOkResponse({
       description: 'Puntos de Origen encontrados',
-      type: OriginDto,
+      type: OriginResponseDto,
       isArray: true
     })
     @ApiNotFoundResponse({ description: 'Puntos de Origen no encontrados' })
     //findOrigins(@Query('userId') userId?: number) {
     findOrigins(@GetUser('id') authId: string) {
       if (authId) {
-        return this.originService.findOriginsByUser(authId);
+        return this.originService.getOriginsByUser(authId);
       }
-      return this.originService.findAllOrigins();
+      return this.originService.getAllOrigins();
     }
   
     @Get(':id')
     @ApiOkResponse({
       description: 'Punto de Origen encontrado',
-      type: OriginDto
+      type: OriginResponseDto
     })
     @ApiNotFoundResponse({ description: 'Punto de Origen no encontrada' })
     findOneOrigin(@Param('id') id: string) {
-      return this.originService.findOneOrigin(id);
+      return this.originService.getOriginById(id);
     }
   
     @Patch(':id')

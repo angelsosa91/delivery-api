@@ -3,7 +3,9 @@ import { InjectRepository, InjectEntityManager  } from '@nestjs/typeorm';
 import { Repository, EntityManager } from 'typeorm';
 import { Order } from '../entities/order.entity';
 import { OrderReference } from '../entities/order-reference.entity';
+import { OrderReferenceResponseDto } from '../dto/order-reference-response.dto';
 import { OrderDto } from '../dto/order.dto';
+import { OrderResponseDto } from '../dto/order-response.dto';
 import { OrderCreatedDto } from '../dto/order-created.dto';
 import { OrderReferenceDto } from '../dto/order-reference.dto';
 import { OrderTrackingDto } from '../dto/order-tracking.dto';
@@ -187,6 +189,39 @@ export class OrderService {
     }
   }
 
+  //retorna dto
+  async getAllOrders(): Promise<OrderResponseDto[]> {
+    const orders = await this.orderRepository.find({
+      relations: ['orderReferences'],
+    });
+
+    return orders.map(this.mapToDTO);
+  }
+
+  async getOrdersByUser(authId: string): Promise<OrderResponseDto[]> {
+    const userId = await this.userService.getUserId(authId);
+    const orders = await this.orderRepository.find({
+      where: { userId: userId },
+      relations: ['orderReferences'],
+    });
+
+    return orders.map(this.mapToDTO);
+  }
+
+  async getOrderById(id: string): Promise<OrderResponseDto> {
+    const order = await this.orderRepository.findOne({
+      where: { id },
+      relations: ['orderReferences'],
+    });
+    
+    if (!order) {
+      throw new NotFoundException(`Pedido con ID ${id} no encontrado`);
+    }
+    
+    return this.mapToDTO(order);
+  }
+
+  //retorna entity
   async findAllOrders(): Promise<Order[]> {
     return this.orderRepository.find({
       relations: ['orderReferences'],
@@ -372,6 +407,41 @@ export class OrderService {
     return order;
   }
 
+  mapToDTO(entity: Order): OrderResponseDto {
+    const dto = new OrderResponseDto();
+
+    dto.id = entity.id;
+    dto.receiverName = entity.receiverName;
+    dto.receiverPhone = entity.receiverPhone;
+    dto.description = entity.description;
+    dto.paymentMethod = entity.paymentMethod;
+    dto.senderPhone = entity.senderPhone;
+    dto.latitudeFrom = entity.latitudeFrom;
+    dto.longitudeFrom = entity.longitudeFrom;
+    dto.latitudeTo = entity.latitudeTo;
+    dto.longitudeTo = entity.longitudeTo;
+    dto.distance = entity.distance;
+    dto.amount = entity.amount;
+    dto.deliveryTime = entity.deliveryTime;
+    dto.comments = entity.comments;
+    // Conversión lógica: number o enum a 'SI' | 'NO'
+    dto.withReturn = entity.withReturn === 1 ? 'SI' : 'NO';
+    dto.scheduled = entity.scheduled;
+    dto.scheduledDate = entity.scheduledDate?.toISOString() ?? null;
+    dto.invoice = entity.invoice;
+    dto.invoiceExempt = entity.invoiceExempt;
+    dto.invoiceDoc = entity.invoiceDoc;
+    dto.invoiceName = entity.invoiceName;
+    dto.wallet = entity.wallet;
+    dto.bank = entity.bank;
+    dto.deliveryType = entity.deliveryType;
+    dto.directEvent = entity.directEvent;
+    // Mapear referencias
+    dto.references = entity.orderReferences?.map(this.mapToOrderReferenceDTO) ?? [];
+
+    return dto;
+  }
+
   mapToOrderReference(orderReferenceDto: OrderReferenceDto): OrderReference {
     const orderReference = new OrderReference();
 
@@ -385,6 +455,17 @@ export class OrderService {
 
     return orderReference;
   }
+
+  mapToOrderReferenceDTO(orderReference: OrderReference): OrderReferenceResponseDto {
+    const dto = new OrderReferenceResponseDto();
+
+    dto.documentNumber = orderReference.documentNumber;
+    dto.scheduledDate = orderReference.scheduledDate?.toISOString() ?? null;
+    dto.observation = orderReference.observation;
+
+    return dto;
+  }
+
 
   mapToOrderPoint(order: Order, customer: Customer): OrderPoint {
     const orderPoint = new OrderPoint();

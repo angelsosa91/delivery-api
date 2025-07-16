@@ -17,12 +17,13 @@ import {
   import { AuthService } from '../services/auth.service';
   //import { RegisterDto } from '../dto/register.dto';
   import { LoginDto } from '../dto/login.dto';
-  //import { RefreshTokenDto } from '../dto/refresh-token.dto';
+  import { LoginResponseDto } from '../dto/login-response.dto';
   import { ChangePasswordDto } from '../dto/change-password.dto';
   import { JwtAuthGuard } from '../guards/jwt-auth.guard';
   import { JwtRefreshGuard } from '../guards/jwt-refresh.guard';
   import { GetUser } from '../decorators/get-user.decorator';
   import { Public } from '../decorators/public.decorator';
+import { UserResponseDto } from '../dto/user-response.dto';
   
   @ApiTags('Autenticación')
   @Controller('auth')
@@ -72,7 +73,7 @@ import {
     @Post('login')
     @HttpCode(HttpStatus.OK)
     @ApiOperation({ summary: 'Iniciar sesión' })
-    @ApiResponse({ status: HttpStatus.OK, description: 'Inicio de sesión exitoso' })
+    @ApiResponse({ status: HttpStatus.OK, description: 'Inicio de sesión exitoso', type: LoginResponseDto })
     @ApiResponse({ status: HttpStatus.UNAUTHORIZED, description: 'Credenciales inválidas' })
     async login(
       @Body() loginDto: LoginDto,
@@ -88,11 +89,7 @@ import {
       // Establecer refresh token en cookie HTTP-only
       this.setRefreshTokenCookie(res, refreshToken);
   
-      return {
-        user,
-        accessToken,
-        message: 'Inicio de sesión exitoso',
-      };
+      return  new LoginResponseDto(accessToken, refreshToken);
     }
   
     @Post('logout')
@@ -131,7 +128,7 @@ import {
     @HttpCode(HttpStatus.OK)
     @UseGuards(JwtRefreshGuard)
     @ApiOperation({ summary: 'Refrescar access token usando refresh token' })
-    @ApiResponse({ status: HttpStatus.OK, description: 'Token refrescado exitosamente' })
+    @ApiResponse({ status: HttpStatus.OK, description: 'Token refrescado exitosamente', type: LoginResponseDto })
     @ApiResponse({ status: HttpStatus.UNAUTHORIZED, description: 'Token inválido o expirado' })
     async refreshToken(
       @Req() req: Request,
@@ -149,10 +146,7 @@ import {
       // Establecer nuevo refresh token en cookie
       this.setRefreshTokenCookie(res, tokens.refreshToken);
   
-      return {
-        accessToken: tokens.accessToken,
-        message: 'Token refrescado exitosamente',
-      };
+      return new LoginResponseDto(tokens.accessToken, tokens.refreshToken);
     }
   
     @Post('change-password')
@@ -188,9 +182,9 @@ import {
     @UseGuards(JwtAuthGuard)
     @ApiBearerAuth()
     @ApiOperation({ summary: 'Obtener perfil del usuario autenticado' })
-    @ApiResponse({ status: HttpStatus.OK, description: 'Perfil de usuario' })
-    getProfile(@GetUser() user) {
-      return { user };
+    @ApiResponse({ status: HttpStatus.OK, description: 'Perfil de usuario', type: UserResponseDto })
+    getProfile(@GetUser() user: UserResponseDto): UserResponseDto {
+      return user;
     }
   
     // Método auxiliar para establecer la cookie de refresh token
@@ -199,7 +193,7 @@ import {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'strict',
-        maxAge: 7 * 24 * 60 * 60 * 1000, // 7 días
+        maxAge: 1 * 24 * 60 * 60 * 1000, // 7 días
         path: '/api/auth',
       });
     }

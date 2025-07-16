@@ -1,60 +1,57 @@
-import { IsNotEmpty, IsOptional, IsString } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
-export class CustomerDto {
+export class OriginResponseDto {
   @ApiProperty({ 
-    description: 'Nombre Cliente',
-    example: 'Cliente 1'
+    description: 'Id Origen',
+    example: '3c2d580c-6251-11f0-bda6-e668000d17b5'
   })
-  @IsNotEmpty()
-  @IsString()
-  fullName: string;
+  id: string;
+  
+  @ApiProperty({ 
+    description: 'Nombre del origen',
+    example: 'Casa Matriz'
+  })
+  name: string;
 
   @ApiProperty({ 
     description: 'Teléfono',
-    example: '0985664411'
+    example: '0982555333'
   })
-  @IsNotEmpty()
-  @IsString()
   phone: string;
 
   @ApiProperty({ 
     description: 'Dirección',
-    example: 'Avda Primer Presidente 558'
+    example: 'San Pedro 352 c/ Molas López'
   })
-  @IsNotEmpty()
-  @IsString()
   address: string;
 
   @ApiPropertyOptional({ 
     description: 'Correo electrónico',
-    example: 'cliente@gmail.com'
+    example: 'negocio@gmail.com'
   })
-  @IsOptional()
-  @IsString()
   email: string;
 
   @ApiProperty({ 
     description: 'Latitud',
     example: '-25.3298328'
   })
-  @IsNotEmpty()
-  @IsString()
   latitude: string;
 
   @ApiProperty({ 
     description: 'Longitud',
     example: '-57.5690995'
   })
-  @IsNotEmpty()
-  @IsString()
   longitude: string;
 
   @ApiPropertyOptional({ 
     description: 'Referencias',
     example: 'A 100 metros del Ruta 1'
   })
-  @IsOptional()
-  @IsString()
   references: string;
+
+  @ApiProperty({ 
+    description: 'Origen Predeterminado',
+    example: 'SI/NO'
+  })
+  default: string;
 }
