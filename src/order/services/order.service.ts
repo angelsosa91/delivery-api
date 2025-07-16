@@ -192,7 +192,7 @@ export class OrderService {
   //retorna dto
   async getAllOrders(status: string): Promise<OrderResponseDto[]> {
     const orders = await this.orderRepository.find({
-      where: { processed: status, syncId: 0 },
+      where: { processed: status },
       relations: ['orderReferences'],
     });
 
@@ -203,7 +203,7 @@ export class OrderService {
   async getOrdersByUser(authId: string, status: string): Promise<OrderResponseDto[]> {
     const userId = await this.userService.getUserId(authId);
     const orders = await this.orderRepository.find({
-      where: { userId: userId, processed: status, syncId: 0 },
+      where: { userId: userId, processed: status },
       relations: ['orderReferences'],
     });
 
