@@ -521,8 +521,8 @@ export class OrderService {
   async checkEnvLimitPerOrder(authId: string){
     if (process.env.NODE_ENV !== 'production') {
       const qtyOrder = await this.countOrderByAuthId(authId);
-      // Límite de 50 transacciones en sandbox
-      const limit = 50;
+      // Límite de 10000 transacciones en sandbox
+      const limit = 10000;
       // Verificar si se ha alcanzado el límite
       if (qtyOrder >= limit) {
         throw new Error(
