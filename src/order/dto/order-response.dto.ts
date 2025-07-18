@@ -29,7 +29,7 @@ export class OrderResponseDto {
 
   @ApiProperty({ 
     description: 'Medio de Pago',
-    example: 'Efectivo/Tarjeta'
+    example: 'Efectivo/Tarjeta/Credito'
   })
   paymentMethod: string;
 

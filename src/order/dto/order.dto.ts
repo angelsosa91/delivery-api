@@ -38,10 +38,10 @@ export class OrderDto {
 
   @ApiProperty({ 
     description: 'Medio de Pago',
-    example: 'Efectivo/Tarjeta'
+    example: 'Efectivo/Tarjeta/Credito'
   })
   @IsNotEmpty()
-  @IsEnum(['Efectivo', 'Tarjeta'])
+  @IsEnum(['Efectivo', 'Tarjeta', 'Credito'])
   paymentMethod: string;
 
   @ApiProperty({ 
