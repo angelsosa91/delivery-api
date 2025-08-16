@@ -30,7 +30,7 @@ export class OrderService {
   //constantes
   private readonly SERVICE_TYPE: string = 'DELIVERY';
   private readonly SERVICE_STATUS: string = 'Pendiente';
-  private readonly PAYMENT_METHOD: string = 'Credito';
+  //private readonly PAYMENT_METHOD: string = 'Credito';
   private readonly REFERENCE_STATUS: string = 'PENDIENTE';
   private readonly BUDGET_STATUS: string = 'CONSULTADO';
   private readonly MQ_QUEUE: string = 'order_queue';
@@ -397,7 +397,7 @@ export class OrderService {
 
     // Aquí puedes rellenar los demás campos que no vienen del DTO
     order.paymentMethod = orderDto.paymentMethod; //this.PAYMENT_METHOD;
-    order.status = this.SERVICE_STATUS; // Por ejemplo, el estado por defecto
+    order.status = orderDto.status; //this.SERVICE_STATUS;
     order.serviceType = this.SERVICE_TYPE; // Por ejemplo, el servicio por defecto
     order.rating = 0; // Rating por defecto
     order.discount = 0; // Descuento por defecto

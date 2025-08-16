@@ -92,6 +92,14 @@ export class OrderDto {
   @IsString()
   longitudeTo: string;
 
+  @ApiProperty({ 
+    description: 'Estado de la Orden',
+    example: 'Aprobacion / Pendiente. "Aprobacion" significa que el pedido se debe confirmar con el punto de entrega'
+  })
+  @IsNotEmpty()
+  @IsEnum(['Aprobacion', 'Pendiente'])
+  status: string;
+
   @ApiPropertyOptional({ 
     description: 'Comentarios adicionales',
     example: 'Ninguno'
