@@ -35,7 +35,7 @@ export default () => ({
 
   // Configuración WhatsApp
   whatsapp: {
-    verifyToken: process.env.WHATSAPP_VERIFY_TOKEN || 'your_verify_token',
+    verifyToken: process.env.WHATSAPP_VERIFY_TOKEN || 'jOdD5uzKljT3bvTLG8Fzqdx1MqmpX3lPXwM8FGb8B3cmM2vcG66VxQGz81eHiRVr2XCdx2LGijy9RCAmLmifajq1keV8wH8FSWLT0fHIxAc7KFgJAX4DXHr2Gx4gUJ7A',
     accessToken: process.env.WHATSAPP_ACCESS_TOKEN || '',
     phoneNumberId: process.env.WHATSAPP_PHONE_NUMBER_ID || '',
     businessAccountId: process.env.WHATSAPP_BUSINESS_ACCOUNT_ID || '',

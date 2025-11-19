@@ -16,7 +16,7 @@ import { WhatsappService } from '../services/whatsapp.service';
 import { WebhookPayloadDto } from '../dto';
 
 @ApiTags('WhatsApp Webhook')
-@Controller('webhook')
+@Controller('whatsapp/webhook')
 export class WhatsappWebhookController {
   private readonly logger = new Logger(WhatsappWebhookController.name);
 
