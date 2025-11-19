@@ -32,4 +32,13 @@ export default () => ({
   
   // Configuración CORS
   corsOrigin: process.env.CORS_ORIGIN || '*',
+
+  // Configuración WhatsApp
+  whatsapp: {
+    verifyToken: process.env.WHATSAPP_VERIFY_TOKEN || 'your_verify_token',
+    accessToken: process.env.WHATSAPP_ACCESS_TOKEN || '',
+    phoneNumberId: process.env.WHATSAPP_PHONE_NUMBER_ID || '',
+    businessAccountId: process.env.WHATSAPP_BUSINESS_ACCOUNT_ID || '',
+    apiVersion: process.env.WHATSAPP_API_VERSION || 'v17.0',
+  },
 });

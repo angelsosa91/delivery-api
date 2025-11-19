@@ -6,6 +6,7 @@ import { AuthModule } from './auth/auth.module';
 import { OrderModule } from './order/order.module';
 import { CustomerModule } from './customer/customer.module';
 import { OriginModule } from './origin/origin.module';
+import { WhatsappModule } from './whatsapp/whatsapp.module';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { APP_GUARD } from '@nestjs/core';
 import { ThrottlerGuard } from '@nestjs/throttler';
@@ -56,7 +57,8 @@ import { ThrottlerGuard } from '@nestjs/throttler';
     AuthModule,
     CustomerModule,
     OrderModule,
-    OriginModule
+    OriginModule,
+    WhatsappModule
   ],
   providers: [
     {
